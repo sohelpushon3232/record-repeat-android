@@ -156,4 +156,83 @@ public class WorkflowStorage {
 
     }
 
+public static List<ActionStep> loadWorkflow(
+        Context context,
+        String workflowName
+){
+
+    ArrayList<ActionStep> steps =
+            new ArrayList<>();
+
+
+    JSONArray workflows =
+            getWorkflows(context);
+
+
+    try{
+
+
+        for(int i = 0; i < workflows.length(); i++){
+
+
+            JSONObject workflow =
+                    workflows.getJSONObject(i);
+
+
+
+            if(workflow
+                    .getString("name")
+                    .equals(workflowName)){
+
+
+
+                JSONArray actions =
+                        workflow.getJSONArray(
+                                "steps"
+                        );
+
+
+
+                for(int j = 0;
+                     j < actions.length();
+                     j++){
+
+
+
+                    JSONObject obj =
+                            actions.getJSONObject(j);
+
+
+
+                    steps.add(
+                            new ActionStep(
+                                    obj.getString("action"),
+                                    obj.getInt("x"),
+                                    obj.getInt("y"),
+                                    obj.getString("text"),
+                                    obj.getLong("delay")
+                            )
+                    );
+
+                }
+
+
+                break;
+
+            }
+
+
+        }
+
+
+    }catch(Exception e){
+
+        e.printStackTrace();
+
+    }
+
+
+    return steps;
+
+}
 }
