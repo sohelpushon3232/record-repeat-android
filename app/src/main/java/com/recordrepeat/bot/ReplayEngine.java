@@ -1,115 +1,75 @@
 package com.recordrepeat.bot;
 
-import android.content.Context;
-import android.widget.Toast;
-
 import java.util.List;
-
 
 public class ReplayEngine {
 
+    private final TouchRecorderService service;
 
-    private Context context;
+    private volatile boolean running = false;
 
-
-    public ReplayEngine(Context context){
-
-        this.context = context;
-
+    public ReplayEngine(TouchRecorderService service) {
+        this.service = service;
     }
 
-
-
     public void start(
-            int repeatCount,
-            List<ActionStep> steps
-    ){
+            List<ActionStep> steps,
+            int repeatCount
+    ) {
 
+        if (service == null) return;
+
+        running = true;
 
         new Thread(() -> {
 
+            for (int r = 0;
+                 r < repeatCount && running;
+                 r++) {
 
-            for(int i = 0; i < repeatCount; i++){
+                for (ActionStep step : steps) {
 
+                    if (!running) return;
 
-                for(ActionStep step : steps){
-
-
-                    try{
+                    try {
 
                         Thread.sleep(
-                                step.delay
+                                Math.max(100, step.delay)
                         );
 
+                        switch (step.action) {
 
-                        execute(step);
+                            case "OPEN_APP":
 
+                                service.openApp(step.text);
+                                break;
 
-                    }catch(Exception e){
+                            case "CLICK":
 
+                                service.performTap(
+                                        step.x,
+                                        step.y
+                                );
+                                break;
+
+                            case "TEXT":
+
+                                service.typeText(step.text);
+                                break;
+                        }
+
+                    } catch (Exception e) {
                         e.printStackTrace();
-
                     }
-
                 }
-
             }
 
-
-            Toast.makeText(
-                    context,
-                    "Automation Finished",
-                    Toast.LENGTH_SHORT
-            ).show();
-
+            running = false;
 
         }).start();
-
-
     }
 
-
-
-    private void execute(
-            ActionStep step
-    ){
-
-
-        if(step.action.equals("CLICK")){
-
-
-            System.out.println(
-                    "Click: " + step.text
-            );
-
-
-        }
-
-
-
-        if(step.action.equals("TEXT")){
-
-
-            System.out.println(
-                    "Type: " + step.text
-            );
-
-
-        }
-
-
-
-        if(step.action.equals("VIEW")){
-
-
-            System.out.println(
-                    "View: " + step.text
-            );
-
-
-        }
-
-
+    public void stop() {
+        running = false;
     }
-
 }
