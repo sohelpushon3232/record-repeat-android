@@ -9,17 +9,18 @@ public class AutoRepeatEngine {
     private boolean running = false;
 
 
-    private ReplayEngine replayEngine;
+    private TouchRecorderService service;
 
 
 
     public AutoRepeatEngine(
-            ReplayEngine replayEngine
+            TouchRecorderService service
     ){
 
-        this.replayEngine = replayEngine;
+        this.service = service;
 
     }
+
 
 
 
@@ -35,37 +36,48 @@ public class AutoRepeatEngine {
         new Thread(() -> {
 
 
-
-            int count = 0;
-
+            int current = 0;
 
 
-            while(running &&
+
+            while(
+                    running &&
                     (repeatCount == 0 ||
-                    count < repeatCount)){
+                    current < repeatCount)
+            ){
+
+
+                for(ActionStep step : steps){
+
+
+                    if(!running){
+                        return;
+                    }
+
+
+                    try{
+
+
+                        Thread.sleep(
+                                step.delay
+                        );
+
+
+                        execute(step);
 
 
 
-                replayEngine.start(
-                        steps,
-                        1
-                );
+                    }catch(Exception e){
 
+                        e.printStackTrace();
 
+                    }
 
-                count++;
-
-
-
-                try{
-
-                    Thread.sleep(1000);
-
-                }catch(Exception e){
-
-                    e.printStackTrace();
 
                 }
+
+
+                current++;
 
 
             }
@@ -80,12 +92,58 @@ public class AutoRepeatEngine {
 
 
 
+    private void execute(
+            ActionStep step
+    ){
+
+
+        switch(step.action){
+
+
+            case "CLICK":
+
+                service.performTap(
+                        step.x,
+                        step.y
+                );
+
+                break;
+
+
+
+            case "TEXT":
+
+                service.typeText(
+                        step.text
+                );
+
+                break;
+
+
+
+            case "OPEN_APP":
+
+                service.openApp(
+                        step.text
+                );
+
+                break;
+
+
+        }
+
+
+    }
+
+
+
+
+
     public void stop(){
 
         running = false;
 
     }
-
 
 
 }
