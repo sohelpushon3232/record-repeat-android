@@ -3,8 +3,9 @@ package com.recordrepeat.bot;
 import android.app.Activity;
 import android.os.Bundle;
 import android.widget.*;
+import org.json.JSONArray;
 
-import java.util.List;
+import java.util.ArrayList;
 
 
 public class MainActivity extends Activity {
@@ -13,9 +14,15 @@ public class MainActivity extends Activity {
     EditText workflowName;
     EditText repeatInput;
 
+    ListView workflowList;
+
+    ArrayList<String> names =
+            new ArrayList<>();
+
+
     RecordManager recordManager;
 
-    ReplayEngine replayEngine;
+    String selectedWorkflow = "";
 
 
 
@@ -29,7 +36,6 @@ public class MainActivity extends Activity {
                 RecordManager.getInstance();
 
 
-
         LinearLayout layout =
                 new LinearLayout(this);
 
@@ -38,7 +44,7 @@ public class MainActivity extends Activity {
         );
 
         layout.setPadding(
-                40,40,40,40
+                30,30,30,30
         );
 
 
@@ -81,8 +87,16 @@ public class MainActivity extends Activity {
                 new Button(this);
 
         run.setText(
-                "RUN"
+                "RUN SELECTED"
         );
+
+
+        workflowList =
+                new ListView(this);
+
+
+
+        loadWorkflows();
 
 
 
@@ -111,7 +125,7 @@ public class MainActivity extends Activity {
 
             if(name.isEmpty()){
 
-                name = "My Workflow";
+                name="My Workflow";
 
             }
 
@@ -123,9 +137,12 @@ public class MainActivity extends Activity {
             );
 
 
+            loadWorkflows();
+
+
             Toast.makeText(
                     this,
-                    "Saved: " + name,
+                    "Workflow Saved",
                     Toast.LENGTH_SHORT
             ).show();
 
@@ -134,48 +151,42 @@ public class MainActivity extends Activity {
 
 
 
+        workflowList.setOnItemClickListener(
+                (parent, view, position, id) -> {
+
+                    selectedWorkflow =
+                            names.get(position);
+
+
+                    Toast.makeText(
+                            this,
+                            selectedWorkflow+" selected",
+                            Toast.LENGTH_SHORT
+                    ).show();
+
+                });
+
+
+
         run.setOnClickListener(v -> {
 
+            if(selectedWorkflow.isEmpty()){
 
-            List<ActionStep> steps =
-                    recordManager.getSteps();
+                Toast.makeText(
+                        this,
+                        "Select workflow first",
+                        Toast.LENGTH_SHORT
+                ).show();
 
-
-            int count = 1;
-
-
-            try{
-
-                count =
-                Integer.parseInt(
-                        repeatInput
-                        .getText()
-                        .toString()
-                );
-
-            }catch(Exception ignored){}
-
-
-
-            TouchRecorderService service =
-                    TouchRecorderService.getInstance();
-
-
-
-            if(service != null){
-
-
-                replayEngine =
-                        new ReplayEngine(service);
-
-
-                replayEngine.start(
-                        steps,
-                        count
-                );
-
+                return;
             }
 
+
+            Toast.makeText(
+                    this,
+                    "Running: "+selectedWorkflow,
+                    Toast.LENGTH_SHORT
+            ).show();
 
         });
 
@@ -189,10 +200,51 @@ public class MainActivity extends Activity {
 
         layout.addView(save);
 
+        layout.addView(workflowList);
+
         layout.addView(run);
 
 
         setContentView(layout);
+
+    }
+
+
+
+    private void loadWorkflows(){
+
+
+        names.clear();
+
+
+        JSONArray array =
+                WorkflowStorage.getWorkflows(this);
+
+
+        for(int i=0;i<array.length();i++){
+
+            try{
+
+                names.add(
+                    array.getJSONObject(i)
+                    .getString("name")
+                );
+
+
+            }catch(Exception e){}
+
+
+        }
+
+
+
+        workflowList.setAdapter(
+                new ArrayAdapter<>(
+                        this,
+                        android.R.layout.simple_list_item_1,
+                        names
+                )
+        );
 
     }
 
