@@ -1,25 +1,34 @@
 package com.recordrepeat.bot;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
-import android.provider.Settings;
-
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.Toast;
+import android.widget.*;
 
 import java.util.List;
 
+
 public class MainActivity extends Activity {
 
-    private ReplayEngine replayEngine;
+
+    EditText workflowName;
+    EditText repeatInput;
+
+    RecordManager recordManager;
+
+    ReplayEngine replayEngine;
+
+
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState){
 
         super.onCreate(savedInstanceState);
+
+
+        recordManager =
+                RecordManager.getInstance();
+
+
 
         LinearLayout layout =
                 new LinearLayout(this);
@@ -29,22 +38,27 @@ public class MainActivity extends Activity {
         );
 
         layout.setPadding(
-                40, 40, 40, 40
+                40,40,40,40
         );
 
-        EditText repeat =
+
+        workflowName =
                 new EditText(this);
 
-        repeat.setHint("Repeat Count");
-        repeat.setInputType(2);
-
-
-        Button permission =
-                new Button(this);
-
-        permission.setText(
-                "ENABLE ACCESSIBILITY"
+        workflowName.setHint(
+                "Workflow Name"
         );
+
+
+        repeatInput =
+                new EditText(this);
+
+        repeatInput.setHint(
+                "Repeat Count"
+        );
+
+        repeatInput.setInputType(2);
+
 
 
         Button record =
@@ -55,11 +69,11 @@ public class MainActivity extends Activity {
         );
 
 
-        Button stopRecord =
+        Button save =
                 new Button(this);
 
-        stopRecord.setText(
-                "STOP & SAVE"
+        save.setText(
+                "SAVE WORKFLOW"
         );
 
 
@@ -67,141 +81,119 @@ public class MainActivity extends Activity {
                 new Button(this);
 
         run.setText(
-                "RUN AUTOMATION"
+                "RUN"
         );
 
-
-        Button stop =
-                new Button(this);
-
-        stop.setText(
-                "STOP AUTOMATION"
-        );
-
-
-        permission.setOnClickListener(v -> {
-
-            startActivity(
-                    new Intent(
-                            Settings.ACTION_ACCESSIBILITY_SETTINGS
-                    )
-            );
-        });
 
 
         record.setOnClickListener(v -> {
 
-            RecordManager
-                    .getInstance()
-                    .startRecording();
+            recordManager.startRecording();
 
             Toast.makeText(
                     this,
                     "Recording Started",
                     Toast.LENGTH_SHORT
             ).show();
+
         });
 
 
-        stopRecord.setOnClickListener(v -> {
 
-            RecordManager manager =
-                    RecordManager.getInstance();
+        save.setOnClickListener(v -> {
 
-            manager.stopRecording();
 
-            WorkflowStorage.save(
+            String name =
+                    workflowName
+                    .getText()
+                    .toString();
+
+
+            if(name.isEmpty()){
+
+                name = "My Workflow";
+
+            }
+
+
+            WorkflowStorage.saveWorkflow(
                     this,
-                    manager.getSteps()
+                    name,
+                    recordManager.getSteps()
             );
+
 
             Toast.makeText(
                     this,
-                    "Workflow Saved",
+                    "Saved: " + name,
                     Toast.LENGTH_SHORT
             ).show();
+
+
         });
+
 
 
         run.setOnClickListener(v -> {
 
-            TouchRecorderService service =
-                    TouchRecorderService.getInstance();
 
-            if (service == null) {
+            List<ActionStep> steps =
+                    recordManager.getSteps();
 
-                Toast.makeText(
-                        this,
-                        "Enable Accessibility first",
-                        Toast.LENGTH_LONG
-                ).show();
-
-                return;
-            }
 
             int count = 1;
 
-            try {
-                count = Integer.parseInt(
-                        repeat.getText()
-                                .toString()
-                                .trim()
+
+            try{
+
+                count =
+                Integer.parseInt(
+                        repeatInput
+                        .getText()
+                        .toString()
                 );
-            } catch (Exception ignored) {}
 
-            if (count < 1) count = 1;
+            }catch(Exception ignored){}
 
-            List<ActionStep> steps =
-                    WorkflowStorage.load(this);
 
-            if (steps.isEmpty()) {
 
-                Toast.makeText(
-                        this,
-                        "No saved workflow",
-                        Toast.LENGTH_SHORT
-                ).show();
+            TouchRecorderService service =
+                    TouchRecorderService.getInstance();
 
-                return;
+
+
+            if(service != null){
+
+
+                replayEngine =
+                        new ReplayEngine(service);
+
+
+                replayEngine.start(
+                        steps,
+                        count
+                );
+
             }
 
-            replayEngine =
-                    new ReplayEngine(service);
 
-            replayEngine.start(
-                    steps,
-                    count
-            );
-
-            Toast.makeText(
-                    this,
-                    "Automation Started",
-                    Toast.LENGTH_SHORT
-            ).show();
         });
 
 
-        stop.setOnClickListener(v -> {
 
-            if (replayEngine != null) {
-                replayEngine.stop();
-            }
+        layout.addView(workflowName);
 
-            Toast.makeText(
-                    this,
-                    "Automation Stopped",
-                    Toast.LENGTH_SHORT
-            ).show();
-        });
+        layout.addView(repeatInput);
 
-
-        layout.addView(permission);
-        layout.addView(repeat);
         layout.addView(record);
-        layout.addView(stopRecord);
+
+        layout.addView(save);
+
         layout.addView(run);
-        layout.addView(stop);
+
 
         setContentView(layout);
+
     }
+
 }
