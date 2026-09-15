@@ -5,54 +5,103 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.Toast;
 
+
 public class TouchRecorderService extends AccessibilityService {
+
 
     private static TouchRecorderService instance;
 
-    public static TouchRecorderService getInstance() {
+
+    private RecordManager recordManager;
+
+
+
+    public static TouchRecorderService getInstance(){
+
         return instance;
+
     }
 
+
+
     @Override
-    public void onServiceConnected() {
+    public void onServiceConnected(){
+
         super.onServiceConnected();
+
         instance = this;
+
+        recordManager = new RecordManager(this);
+
 
         Toast.makeText(
                 this,
-                "Recorder Service Connected",
+                "Recorder Ready",
                 Toast.LENGTH_SHORT
         ).show();
+
     }
 
+
+
     @Override
-    public void onAccessibilityEvent(AccessibilityEvent event) {
+    public void onAccessibilityEvent(
+            AccessibilityEvent event
+    ){
 
-        AccessibilityNodeInfo node = event.getSource();
-
-        if (node != null) {
-
-            String text = node.getText() != null
-                    ? node.getText().toString()
-                    : "";
-
-            if (!text.isEmpty()) {
-                System.out.println(
-                    "Detected: " + text
-                );
-            }
+        if(event == null){
+            return;
         }
+
+
+        AccessibilityNodeInfo node =
+                event.getSource();
+
+
+
+        if(node != null){
+
+
+            String text = "";
+
+
+            if(node.getText()!=null){
+
+                text = node.getText().toString();
+
+            }
+
+
+
+            if(!text.isEmpty()){
+
+
+                ActionStep step =
+                        new ActionStep(
+                                "TEXT",
+                                0,
+                                0,
+                                text,
+                                1000
+                        );
+
+
+                recordManager.addStep(step);
+
+            }
+
+
+        }
+
+
     }
+
+
 
     @Override
-    public void onInterrupt() {
+    public void onInterrupt(){
 
     }
 
-    public void recordAction(String action) {
 
-        System.out.println(
-            "Recorded Action: " + action
-        );
-    }
 }
