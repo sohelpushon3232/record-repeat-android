@@ -3,6 +3,7 @@ package com.recordrepeat.bot;
 import android.app.Service;
 import android.content.Intent;
 import android.graphics.PixelFormat;
+import android.os.Build;
 import android.os.IBinder;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -17,7 +18,6 @@ public class FloatingControlService extends Service {
     private WindowManager windowManager;
 
     private Button floatingButton;
-
 
     private WindowManager.LayoutParams params;
 
@@ -79,8 +79,20 @@ public class FloatingControlService extends Service {
                 PixelFormat.TRANSLUCENT;
 
 
-        params.type =
-                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+
+            params.type =
+                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+
+        }else{
+
+            params.type =
+                    WindowManager.LayoutParams.TYPE_PHONE;
+
+        }
+
+
 
 
         params.flags =
@@ -92,82 +104,90 @@ public class FloatingControlService extends Service {
                 new Button.OnTouchListener(){
 
 
-            private int initialX;
-            private int initialY;
+                    private int initialX;
+                    private int initialY;
 
-            private float initialTouchX;
-            private float initialTouchY;
-
-
-
-            @Override
-            public boolean onTouch(
-                    android.view.View view,
-                    MotionEvent event
-            ){
-
-
-                switch(event.getAction()){
-
-
-                    case MotionEvent.ACTION_DOWN:
-
-                        initialX =
-                                params.x;
-
-                        initialY =
-                                params.y;
-
-
-                        initialTouchX =
-                                event.getRawX();
-
-                        initialTouchY =
-                                event.getRawY();
-
-
-                        return true;
+                    private float initialTouchX;
+                    private float initialTouchY;
 
 
 
-                    case MotionEvent.ACTION_MOVE:
+                    @Override
+                    public boolean onTouch(
+                            android.view.View view,
+                            MotionEvent event
+                    ){
 
 
-                        params.x =
-                                initialX +
-                                (int)(
-                                initialTouchX -
-                                event.getRawX()
-                                );
+                        switch(event.getAction()){
 
 
-                        params.y =
-                                initialY +
-                                (int)(
-                                event.getRawY() -
-                                initialTouchY
-                                );
+                            case MotionEvent.ACTION_DOWN:
+
+
+                                initialX =
+                                        params.x;
+
+                                initialY =
+                                        params.y;
+
+
+                                initialTouchX =
+                                        event.getRawX();
+
+
+                                initialTouchY =
+                                        event.getRawY();
+
+
+                                return true;
 
 
 
-                        windowManager.updateViewLayout(
-                                floatingButton,
-                                params
-                        );
+                            case MotionEvent.ACTION_MOVE:
 
 
-                        return true;
+                                params.x =
+                                        initialX +
+                                        (int)(
+                                        initialTouchX -
+                                        event.getRawX()
+                                        );
 
 
-                }
+                                params.y =
+                                        initialY +
+                                        (int)(
+                                        event.getRawY() -
+                                        initialTouchY
+                                        );
 
 
-                return false;
 
-            }
+                                try{
+
+                                    windowManager.updateViewLayout(
+                                            floatingButton,
+                                            params
+                                    );
+
+                                }catch(Exception ignored){}
 
 
-        });
+
+                                return true;
+
+
+
+                        }
+
+
+                        return false;
+
+                    }
+
+
+                });
 
 
 
@@ -186,7 +206,7 @@ public class FloatingControlService extends Service {
 
             Toast.makeText(
                     this,
-                    "Allow overlay permission first",
+                    "Overlay permission required",
                     Toast.LENGTH_LONG
             ).show();
 
@@ -195,7 +215,6 @@ public class FloatingControlService extends Service {
 
 
     }
-
 
 
 
@@ -213,6 +232,7 @@ public class FloatingControlService extends Service {
 
             try{
 
+
                 windowManager.removeView(
                         floatingButton
                 );
@@ -221,11 +241,11 @@ public class FloatingControlService extends Service {
             }catch(Exception ignored){}
 
 
-
         }
 
 
     }
+
 
 
 
