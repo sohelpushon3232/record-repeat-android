@@ -2,9 +2,11 @@ package com.recordrepeat.bot;
 
 import android.accessibilityservice.AccessibilityService;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.Toast;
 
 public class AutomationAccessibilityService extends AccessibilityService {
+
 
     private static AutomationAccessibilityService instance;
 
@@ -38,30 +40,46 @@ public class AutomationAccessibilityService extends AccessibilityService {
         }
 
 
-        String text = "";
-
-        if(event.getText() != null){
-
-            text = event.getText().toString();
-
-        }
+        AccessibilityNodeInfo node =
+                event.getSource();
 
 
-        // Event save করার base
-        if(!text.isEmpty()){
+        if(node != null){
+
+            CharSequence text =
+                    node.getText();
+
+
+            if(text != null){
+
+                recordManager.addStep(
+                        "TEXT",
+                        text.toString()
+                );
+
+            }
+
+
+            String className =
+                    node.getClassName()
+                            != null ?
+                    node.getClassName().toString()
+                    :
+                    "";
+
 
             recordManager.addStep(
-                    "TEXT",
-                    text
+                    "VIEW",
+                    className
             );
-
         }
+
 
     }
 
 
     @Override
-    public void onInterrupt() {
+    public void onInterrupt(){
 
     }
 
