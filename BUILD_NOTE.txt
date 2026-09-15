@@ -1,0 +1,8 @@
+READY-TO-BUILD ANDROID PROJECT
+
+This package includes a GitHub Actions workflow at:
+.github/workflows/build-apk.yml
+
+The workflow builds an installable debug APK named RecordRepeatBot.apk and uploads it as a GitHub Actions artifact.
+
+A local APK could not be compiled inside the current ChatGPT container because the environment has no Android SDK/Gradle and outbound binary downloads are unavailable here.

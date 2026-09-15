@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Record Repeat Bot</string>
+    <string name="accessibility_service_description">Records and replays user-approved UI actions for personal automation. Does not bypass security controls.</string>
+</resources>
