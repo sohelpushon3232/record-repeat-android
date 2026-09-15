@@ -3,9 +3,11 @@ package com.recordrepeat.bot;
 import android.app.Activity;
 import android.os.Bundle;
 import android.widget.*;
+
 import org.json.JSONArray;
 
 import java.util.ArrayList;
+import java.util.List;
 
 
 public class MainActivity extends Activity {
@@ -36,6 +38,7 @@ public class MainActivity extends Activity {
                 RecordManager.getInstance();
 
 
+
         LinearLayout layout =
                 new LinearLayout(this);
 
@@ -48,12 +51,14 @@ public class MainActivity extends Activity {
         );
 
 
+
         workflowName =
                 new EditText(this);
 
         workflowName.setHint(
                 "Workflow Name"
         );
+
 
 
         repeatInput =
@@ -75,6 +80,7 @@ public class MainActivity extends Activity {
         );
 
 
+
         Button save =
                 new Button(this);
 
@@ -83,12 +89,14 @@ public class MainActivity extends Activity {
         );
 
 
+
         Button run =
                 new Button(this);
 
         run.setText(
                 "RUN SELECTED"
         );
+
 
 
         workflowList =
@@ -102,7 +110,9 @@ public class MainActivity extends Activity {
 
         record.setOnClickListener(v -> {
 
+
             recordManager.startRecording();
+
 
             Toast.makeText(
                     this,
@@ -110,7 +120,9 @@ public class MainActivity extends Activity {
                     Toast.LENGTH_SHORT
             ).show();
 
+
         });
+
 
 
 
@@ -123,11 +135,13 @@ public class MainActivity extends Activity {
                     .toString();
 
 
+
             if(name.isEmpty()){
 
-                name="My Workflow";
+                name = "My Workflow";
 
             }
+
 
 
             WorkflowStorage.saveWorkflow(
@@ -137,7 +151,9 @@ public class MainActivity extends Activity {
             );
 
 
+
             loadWorkflows();
+
 
 
             Toast.makeText(
@@ -151,11 +167,15 @@ public class MainActivity extends Activity {
 
 
 
+
+
         workflowList.setOnItemClickListener(
                 (parent, view, position, id) -> {
 
+
                     selectedWorkflow =
                             names.get(position);
+
 
 
                     Toast.makeText(
@@ -164,13 +184,20 @@ public class MainActivity extends Activity {
                             Toast.LENGTH_SHORT
                     ).show();
 
+
                 });
+
+
+
 
 
 
         run.setOnClickListener(v -> {
 
+
+
             if(selectedWorkflow.isEmpty()){
+
 
                 Toast.makeText(
                         this,
@@ -178,8 +205,100 @@ public class MainActivity extends Activity {
                         Toast.LENGTH_SHORT
                 ).show();
 
+
                 return;
+
             }
+
+
+
+
+            TouchRecorderService service =
+                    TouchRecorderService.getInstance();
+
+
+
+
+            if(service == null){
+
+
+                Toast.makeText(
+                        this,
+                        "Enable Accessibility First",
+                        Toast.LENGTH_LONG
+                ).show();
+
+
+                return;
+
+            }
+
+
+
+
+
+            int count = 1;
+
+
+
+            try{
+
+
+                count =
+                Integer.parseInt(
+                        repeatInput
+                        .getText()
+                        .toString()
+                );
+
+
+
+            }catch(Exception ignored){}
+
+
+
+
+
+            List<ActionStep> steps =
+                    WorkflowStorage.loadWorkflow(
+                            this,
+                            selectedWorkflow
+                    );
+
+
+
+
+
+            if(steps.isEmpty()){
+
+
+                Toast.makeText(
+                        this,
+                        "No steps found",
+                        Toast.LENGTH_SHORT
+                ).show();
+
+
+                return;
+
+            }
+
+
+
+
+
+            ReplayEngine engine =
+                    new ReplayEngine(service);
+
+
+
+
+            engine.start(
+                    steps,
+                    count
+            );
+
+
 
 
             Toast.makeText(
@@ -188,7 +307,11 @@ public class MainActivity extends Activity {
                     Toast.LENGTH_SHORT
             ).show();
 
+
+
         });
+
+
 
 
 
@@ -205,25 +328,36 @@ public class MainActivity extends Activity {
         layout.addView(run);
 
 
+
         setContentView(layout);
 
+
     }
+
+
+
 
 
 
     private void loadWorkflows(){
 
 
+
         names.clear();
+
 
 
         JSONArray array =
                 WorkflowStorage.getWorkflows(this);
 
 
+
+
         for(int i=0;i<array.length();i++){
 
+
             try{
+
 
                 names.add(
                     array.getJSONObject(i)
@@ -231,10 +365,13 @@ public class MainActivity extends Activity {
                 );
 
 
-            }catch(Exception e){}
+
+            }catch(Exception ignored){}
+
 
 
         }
+
 
 
 
@@ -247,5 +384,6 @@ public class MainActivity extends Activity {
         );
 
     }
+
 
 }
