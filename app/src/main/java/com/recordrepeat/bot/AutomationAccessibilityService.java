@@ -7,7 +7,6 @@ import android.widget.Toast;
 
 public class AutomationAccessibilityService extends AccessibilityService {
 
-
     private static AutomationAccessibilityService instance;
 
     private RecordManager recordManager;
@@ -31,24 +30,19 @@ public class AutomationAccessibilityService extends AccessibilityService {
 
 
     @Override
-    public void onAccessibilityEvent(
-            AccessibilityEvent event
-    ) {
+    public void onAccessibilityEvent(AccessibilityEvent event) {
 
         if(event == null){
             return;
         }
 
 
-        AccessibilityNodeInfo node =
-                event.getSource();
+        AccessibilityNodeInfo node = event.getSource();
 
 
         if(node != null){
 
-            CharSequence text =
-                    node.getText();
-
+            CharSequence text = node.getText();
 
             if(text != null){
 
@@ -56,16 +50,14 @@ public class AutomationAccessibilityService extends AccessibilityService {
                         "TEXT",
                         text.toString()
                 );
-
             }
 
 
-            String className =
-                    node.getClassName()
-                            != null ?
-                    node.getClassName().toString()
-                    :
-                    "";
+            String className = "";
+
+            if(node.getClassName() != null){
+                className = node.getClassName().toString();
+            }
 
 
             recordManager.addStep(
@@ -73,13 +65,11 @@ public class AutomationAccessibilityService extends AccessibilityService {
                     className
             );
         }
-
-
     }
 
 
     @Override
-    public void onInterrupt(){
+    public void onInterrupt() {
 
     }
 
