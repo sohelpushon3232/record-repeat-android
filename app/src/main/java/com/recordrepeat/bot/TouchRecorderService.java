@@ -11,9 +11,7 @@ public class TouchRecorderService extends AccessibilityService {
 
     private static TouchRecorderService instance;
 
-
     private RecordManager recordManager;
-
 
 
     public static TouchRecorderService getInstance(){
@@ -21,7 +19,6 @@ public class TouchRecorderService extends AccessibilityService {
         return instance;
 
     }
-
 
 
     @Override
@@ -62,37 +59,56 @@ public class TouchRecorderService extends AccessibilityService {
         if(node != null){
 
 
-            String text = "";
+            // Text capture
+
+            if(node.getText() != null){
+
+                String text =
+                        node.getText().toString();
 
 
-            if(node.getText()!=null){
+                if(!text.isEmpty()){
 
-                text = node.getText().toString();
+
+                    ActionStep textStep =
+                            new ActionStep(
+                                    "TEXT",
+                                    0,
+                                    0,
+                                    text,
+                                    1000
+                            );
+
+
+                    recordManager.addStep(textStep);
+
+                }
 
             }
 
 
 
-            if(!text.isEmpty()){
+            // View/Class capture
+
+            if(node.getClassName() != null){
 
 
-                ActionStep step =
+                ActionStep viewStep =
                         new ActionStep(
-                                "TEXT",
+                                "VIEW",
                                 0,
                                 0,
-                                text,
-                                1000
+                                node.getClassName().toString(),
+                                500
                         );
 
 
-                recordManager.addStep(step);
+                recordManager.addStep(viewStep);
 
             }
 
 
         }
-
 
     }
 
@@ -103,5 +119,14 @@ public class TouchRecorderService extends AccessibilityService {
 
     }
 
+
+    @Override
+    public void onDestroy(){
+
+        instance = null;
+
+        super.onDestroy();
+
+    }
 
 }
