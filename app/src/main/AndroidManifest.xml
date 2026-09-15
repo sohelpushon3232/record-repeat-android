@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.os.IBinder;
 import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.Toast;
@@ -16,6 +17,9 @@ public class FloatingControlService extends Service {
     private WindowManager windowManager;
 
     private Button floatingButton;
+
+
+    private WindowManager.LayoutParams params;
 
 
 
@@ -48,7 +52,7 @@ public class FloatingControlService extends Service {
 
             Toast.makeText(
                     this,
-                    "Automation Control Open",
+                    "Automation Control",
                     Toast.LENGTH_SHORT
             ).show();
 
@@ -57,13 +61,13 @@ public class FloatingControlService extends Service {
 
 
 
-        WindowManager.LayoutParams params =
+        params =
                 new WindowManager.LayoutParams();
 
 
-        params.width = 160;
+        params.width = 180;
 
-        params.height = 160;
+        params.height = 180;
 
 
         params.gravity =
@@ -71,15 +75,12 @@ public class FloatingControlService extends Service {
                 Gravity.RIGHT;
 
 
-
         params.format =
                 PixelFormat.TRANSLUCENT;
 
 
-
         params.type =
                 WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
-
 
 
         params.flags =
@@ -87,7 +88,92 @@ public class FloatingControlService extends Service {
 
 
 
+        floatingButton.setOnTouchListener(
+                new Button.OnTouchListener(){
+
+
+            private int initialX;
+            private int initialY;
+
+            private float initialTouchX;
+            private float initialTouchY;
+
+
+
+            @Override
+            public boolean onTouch(
+                    android.view.View view,
+                    MotionEvent event
+            ){
+
+
+                switch(event.getAction()){
+
+
+                    case MotionEvent.ACTION_DOWN:
+
+                        initialX =
+                                params.x;
+
+                        initialY =
+                                params.y;
+
+
+                        initialTouchX =
+                                event.getRawX();
+
+                        initialTouchY =
+                                event.getRawY();
+
+
+                        return true;
+
+
+
+                    case MotionEvent.ACTION_MOVE:
+
+
+                        params.x =
+                                initialX +
+                                (int)(
+                                initialTouchX -
+                                event.getRawX()
+                                );
+
+
+                        params.y =
+                                initialY +
+                                (int)(
+                                event.getRawY() -
+                                initialTouchY
+                                );
+
+
+
+                        windowManager.updateViewLayout(
+                                floatingButton,
+                                params
+                        );
+
+
+                        return true;
+
+
+                }
+
+
+                return false;
+
+            }
+
+
+        });
+
+
+
+
         try{
+
 
             windowManager.addView(
                     floatingButton,
@@ -97,7 +183,13 @@ public class FloatingControlService extends Service {
 
         }catch(Exception e){
 
-            e.printStackTrace();
+
+            Toast.makeText(
+                    this,
+                    "Allow overlay permission first",
+                    Toast.LENGTH_LONG
+            ).show();
+
 
         }
 
@@ -107,10 +199,13 @@ public class FloatingControlService extends Service {
 
 
 
+
     @Override
     public void onDestroy(){
 
+
         super.onDestroy();
+
 
 
         if(floatingButton != null){
@@ -123,11 +218,9 @@ public class FloatingControlService extends Service {
                 );
 
 
-            }catch(Exception e){
+            }catch(Exception ignored){}
 
-                e.printStackTrace();
 
-            }
 
         }
 
