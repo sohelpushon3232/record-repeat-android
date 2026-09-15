@@ -7,29 +7,57 @@
         android:label="Record Repeat Bot"
         android:supportsRtl="true"
         android:icon="@drawable/robot_repeat_automation_icon"
-        android:theme="@android:style/Theme.Material.Light.NoActionBar">
+        android:theme="@style/Theme.Material.Light.NoActionBar">
+
 
         <activity
             android:name="com.recordrepeat.bot.MainActivity"
             android:exported="true">
 
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
         </activity>
 
+
+        <!-- Existing Accessibility Service -->
+
         <service
-            android:name="com.recordrepeat.bot.AutomationAccessibilityService"
+            android:name=".AutomationAccessibilityService"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
             android:exported="true">
 
             <intent-filter>
-                <action android:name="android.accessibilityservice.AccessibilityService"/>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
             </intent-filter>
 
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/accessibility_service_config" />
+
         </service>
+
+
+        <!-- Touch Recorder Service -->
+
+        <service
+            android:name=".TouchRecorderService"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
+            android:exported="true">
+
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/accessibility_service_config" />
+
+        </service>
+
 
     </application>
 
