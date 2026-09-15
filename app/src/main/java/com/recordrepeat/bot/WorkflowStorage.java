@@ -11,69 +11,149 @@ import java.util.List;
 
 public class WorkflowStorage {
 
-    private static final String PREF = "record_repeat_bot";
-    private static final String KEY = "workflow";
 
-    public static void save(Context context, List<ActionStep> steps) {
+    private static final String PREF =
+            "workflow_storage";
 
-        JSONArray array = new JSONArray();
 
-        try {
-            for (ActionStep step : steps) {
+    private static final String KEY =
+            "saved_workflows";
 
-                JSONObject obj = new JSONObject();
 
-                obj.put("action", step.action);
-                obj.put("x", step.x);
-                obj.put("y", step.y);
-                obj.put("text", step.text);
-                obj.put("delay", step.delay);
 
-                array.put(obj);
+    public static void saveWorkflow(
+            Context context,
+            String name,
+            List<ActionStep> steps
+    ){
+
+        try{
+
+            SharedPreferences pref =
+                    context.getSharedPreferences(
+                            PREF,
+                            Context.MODE_PRIVATE
+                    );
+
+
+            JSONArray workflows =
+                    new JSONArray(
+                            pref.getString(
+                                    KEY,
+                                    "[]"
+                            )
+                    );
+
+
+            JSONObject workflow =
+                    new JSONObject();
+
+
+            workflow.put(
+                    "name",
+                    name
+            );
+
+
+            JSONArray actions =
+                    new JSONArray();
+
+
+            for(ActionStep step : steps){
+
+                JSONObject obj =
+                        new JSONObject();
+
+
+                obj.put(
+                        "action",
+                        step.action
+                );
+
+
+                obj.put(
+                        "x",
+                        step.x
+                );
+
+
+                obj.put(
+                        "y",
+                        step.y
+                );
+
+
+                obj.put(
+                        "text",
+                        step.text
+                );
+
+
+                obj.put(
+                        "delay",
+                        step.delay
+                );
+
+
+                actions.put(obj);
+
             }
 
-            context.getSharedPreferences(PREF, Context.MODE_PRIVATE)
-                    .edit()
-                    .putString(KEY, array.toString())
+
+            workflow.put(
+                    "steps",
+                    actions
+            );
+
+
+            workflows.put(workflow);
+
+
+            pref.edit()
+                    .putString(
+                            KEY,
+                            workflows.toString()
+                    )
                     .apply();
 
-        } catch (Exception e) {
+
+        }catch(Exception e){
+
             e.printStackTrace();
+
         }
+
     }
 
-    public static List<ActionStep> load(Context context) {
 
-        ArrayList<ActionStep> result = new ArrayList<>();
+
+    public static JSONArray getWorkflows(
+            Context context
+    ){
 
         SharedPreferences pref =
-                context.getSharedPreferences(PREF, Context.MODE_PRIVATE);
-
-        String raw = pref.getString(KEY, "[]");
-
-        try {
-
-            JSONArray array = new JSONArray(raw);
-
-            for (int i = 0; i < array.length(); i++) {
-
-                JSONObject obj = array.getJSONObject(i);
-
-                result.add(
-                        new ActionStep(
-                                obj.getString("action"),
-                                obj.getInt("x"),
-                                obj.getInt("y"),
-                                obj.optString("text", ""),
-                                obj.optLong("delay", 500)
-                        )
+                context.getSharedPreferences(
+                        PREF,
+                        Context.MODE_PRIVATE
                 );
-            }
 
-        } catch (Exception e) {
-            e.printStackTrace();
+
+        try{
+
+            return new JSONArray(
+                    pref.getString(
+                            KEY,
+                            "[]"
+                    )
+            );
+
+
+        }catch(Exception e){
+
+            return new JSONArray();
+
         }
 
-        return result;
     }
+
 }
