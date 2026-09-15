@@ -27,6 +27,10 @@ public class MainActivity extends Activity {
     String selectedWorkflow = "";
 
 
+    AutoRepeatEngine autoRepeatEngine;
+
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -95,6 +99,15 @@ public class MainActivity extends Activity {
 
         run.setText(
                 "RUN SELECTED"
+        );
+
+
+
+        Button stop =
+                new Button(this);
+
+        stop.setText(
+                "STOP REPEAT"
         );
 
 
@@ -192,6 +205,7 @@ public class MainActivity extends Activity {
 
 
 
+
         run.setOnClickListener(v -> {
 
 
@@ -243,14 +257,12 @@ public class MainActivity extends Activity {
 
             try{
 
-
                 count =
                 Integer.parseInt(
                         repeatInput
                         .getText()
                         .toString()
                 );
-
 
 
             }catch(Exception ignored){}
@@ -287,13 +299,19 @@ public class MainActivity extends Activity {
 
 
 
-            ReplayEngine engine =
+            ReplayEngine replayEngine =
                     new ReplayEngine(service);
 
 
 
+            autoRepeatEngine =
+                    new AutoRepeatEngine(
+                            replayEngine
+                    );
 
-            engine.start(
+
+
+            autoRepeatEngine.start(
                     steps,
                     count
             );
@@ -303,10 +321,33 @@ public class MainActivity extends Activity {
 
             Toast.makeText(
                     this,
-                    "Running: "+selectedWorkflow,
+                    "Auto Repeat Started",
                     Toast.LENGTH_SHORT
             ).show();
 
+
+
+        });
+
+
+
+
+
+        stop.setOnClickListener(v -> {
+
+
+            if(autoRepeatEngine != null){
+
+                autoRepeatEngine.stop();
+
+            }
+
+
+            Toast.makeText(
+                    this,
+                    "Automation Stopped",
+                    Toast.LENGTH_SHORT
+            ).show();
 
 
         });
@@ -326,6 +367,8 @@ public class MainActivity extends Activity {
         layout.addView(workflowList);
 
         layout.addView(run);
+
+        layout.addView(stop);
 
 
 
