@@ -2,28 +2,26 @@ package com.recordrepeat.bot;
 
 import android.accessibilityservice.AccessibilityService;
 import android.view.accessibility.AccessibilityEvent;
-import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.Toast;
 
 public class AutomationAccessibilityService extends AccessibilityService {
 
     private static AutomationAccessibilityService instance;
 
-    private RecordManager recordManager;
+    public static AutomationAccessibilityService getInstance(){
+        return instance;
+    }
 
 
     @Override
-    protected void onServiceConnected() {
-
+    public void onServiceConnected() {
         super.onServiceConnected();
 
         instance = this;
 
-        recordManager = new RecordManager();
-
         Toast.makeText(
                 this,
-                "Automation Service Ready",
+                "Automation Service Connected",
                 Toast.LENGTH_SHORT
         ).show();
     }
@@ -32,39 +30,9 @@ public class AutomationAccessibilityService extends AccessibilityService {
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
 
-        if(event == null){
-            return;
-        }
+        // Future:
+        // screen action capture হবে এখানে
 
-
-        AccessibilityNodeInfo node = event.getSource();
-
-
-        if(node != null){
-
-            CharSequence text = node.getText();
-
-            if(text != null){
-
-                recordManager.addStep(
-                        "TEXT",
-                        text.toString()
-                );
-            }
-
-
-            String className = "";
-
-            if(node.getClassName() != null){
-                className = node.getClassName().toString();
-            }
-
-
-            recordManager.addStep(
-                    "VIEW",
-                    className
-            );
-        }
     }
 
 
@@ -74,9 +42,20 @@ public class AutomationAccessibilityService extends AccessibilityService {
     }
 
 
-    public static AutomationAccessibilityService getInstance(){
+    public void performAction(){
 
-        return instance;
+        // Future:
+        // replay action execute হবে এখানে
 
     }
+
+
+    @Override
+    public void onDestroy(){
+
+        instance = null;
+        super.onDestroy();
+
+    }
+
 }
