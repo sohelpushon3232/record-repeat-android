@@ -1,263 +1,87 @@
-package com.recordrepeat.bot;
+<?xml version="1.0" encoding="utf-8"?>
 
-import android.app.Service;
-import android.content.Intent;
-import android.graphics.PixelFormat;
-import android.os.Build;
-import android.os.IBinder;
-import android.view.Gravity;
-import android.view.MotionEvent;
-import android.view.WindowManager;
-import android.widget.Button;
-import android.widget.Toast;
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
 
-public class FloatingControlService extends Service {
+    <!-- Floating Button Permission -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
 
 
-    private WindowManager windowManager;
+    <application
 
-    private Button floatingButton;
+        android:allowBackup="true"
+        android:label="Record Repeat Bot"
+        android:supportsRtl="true"
+        android:theme="@android:style/Theme.Material.Light.NoActionBar">
 
-    private WindowManager.LayoutParams params;
 
+        <!-- Main App Screen -->
 
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
 
-    @Override
-    public void onCreate(){
 
-        super.onCreate();
+            <intent-filter>
 
+                <action android:name="android.intent.action.MAIN"/>
 
-        windowManager =
-                (WindowManager)
-                        getSystemService(
-                                WINDOW_SERVICE
-                        );
+                <category android:name="android.intent.category.LAUNCHER"/>
 
+            </intent-filter>
 
 
-        floatingButton =
-                new Button(this);
+        </activity>
 
 
-        floatingButton.setText(
-                "BOT"
-        );
 
 
 
-        floatingButton.setOnClickListener(v -> {
+        <!-- Accessibility Recorder Service -->
 
+        <service
 
-            Toast.makeText(
-                    this,
-                    "Automation Control",
-                    Toast.LENGTH_SHORT
-            ).show();
+            android:name=".TouchRecorderService"
 
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
 
-        });
+            android:exported="true">
 
 
+            <intent-filter>
 
-        params =
-                new WindowManager.LayoutParams();
+                <action android:name="android.accessibilityservice.AccessibilityService"/>
 
+            </intent-filter>
 
-        params.width = 180;
 
-        params.height = 180;
+            <meta-data
 
+                android:name="android.accessibilityservice"
 
-        params.gravity =
-                Gravity.TOP |
-                Gravity.RIGHT;
+                android:resource="@xml/accessibility_service_config"/>
 
 
-        params.format =
-                PixelFormat.TRANSLUCENT;
+        </service>
 
 
 
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
 
-            params.type =
-                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 
-        }else{
 
-            params.type =
-                    WindowManager.LayoutParams.TYPE_PHONE;
+        <!-- Floating BOT Service -->
 
-        }
+        <service
 
+            android:name=".FloatingControlService"
 
+            android:exported="false"/>
 
 
-        params.flags =
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 
 
 
-        floatingButton.setOnTouchListener(
-                new Button.OnTouchListener(){
+    </application>
 
 
-                    private int initialX;
-                    private int initialY;
-
-                    private float initialTouchX;
-                    private float initialTouchY;
-
-
-
-                    @Override
-                    public boolean onTouch(
-                            android.view.View view,
-                            MotionEvent event
-                    ){
-
-
-                        switch(event.getAction()){
-
-
-                            case MotionEvent.ACTION_DOWN:
-
-
-                                initialX =
-                                        params.x;
-
-                                initialY =
-                                        params.y;
-
-
-                                initialTouchX =
-                                        event.getRawX();
-
-
-                                initialTouchY =
-                                        event.getRawY();
-
-
-                                return true;
-
-
-
-                            case MotionEvent.ACTION_MOVE:
-
-
-                                params.x =
-                                        initialX +
-                                        (int)(
-                                        initialTouchX -
-                                        event.getRawX()
-                                        );
-
-
-                                params.y =
-                                        initialY +
-                                        (int)(
-                                        event.getRawY() -
-                                        initialTouchY
-                                        );
-
-
-
-                                try{
-
-                                    windowManager.updateViewLayout(
-                                            floatingButton,
-                                            params
-                                    );
-
-                                }catch(Exception ignored){}
-
-
-
-                                return true;
-
-
-
-                        }
-
-
-                        return false;
-
-                    }
-
-
-                });
-
-
-
-
-        try{
-
-
-            windowManager.addView(
-                    floatingButton,
-                    params
-            );
-
-
-        }catch(Exception e){
-
-
-            Toast.makeText(
-                    this,
-                    "Overlay permission required",
-                    Toast.LENGTH_LONG
-            ).show();
-
-
-        }
-
-
-    }
-
-
-
-
-    @Override
-    public void onDestroy(){
-
-
-        super.onDestroy();
-
-
-
-        if(floatingButton != null){
-
-
-            try{
-
-
-                windowManager.removeView(
-                        floatingButton
-                );
-
-
-            }catch(Exception ignored){}
-
-
-        }
-
-
-    }
-
-
-
-
-
-    @Override
-    public IBinder onBind(
-            Intent intent
-    ){
-
-        return null;
-
-    }
-
-
-}
+</manifest>
