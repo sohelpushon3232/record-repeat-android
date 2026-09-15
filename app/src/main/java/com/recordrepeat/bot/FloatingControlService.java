@@ -3,10 +3,10 @@ package com.recordrepeat.bot;
 import android.app.Service;
 import android.content.Intent;
 import android.graphics.PixelFormat;
+import android.os.Build;
 import android.os.IBinder;
 import android.view.Gravity;
-import android.view.LayoutInflater;
-import android.view.View;
+import android.view.MotionEvent;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.Toast;
@@ -17,7 +17,9 @@ public class FloatingControlService extends Service {
 
     private WindowManager windowManager;
 
-    private View floatingView;
+    private Button floatingButton;
+
+    private WindowManager.LayoutParams params;
 
 
 
@@ -30,23 +32,24 @@ public class FloatingControlService extends Service {
 
         windowManager =
                 (WindowManager)
-                getSystemService(
-                        WINDOW_SERVICE
-                );
+                        getSystemService(
+                                WINDOW_SERVICE
+                        );
 
 
 
-        Button button =
+        floatingButton =
                 new Button(this);
 
 
-        button.setText(
+
+        floatingButton.setText(
                 "BOT"
         );
 
 
 
-        button.setOnClickListener(v -> {
+        floatingButton.setOnClickListener(v -> {
 
 
             Toast.makeText(
@@ -60,25 +63,41 @@ public class FloatingControlService extends Service {
 
 
 
-        WindowManager.LayoutParams params =
+
+        params =
                 new WindowManager.LayoutParams();
 
 
-        params.width = 150;
+        params.width = 180;
 
-        params.height = 150;
+        params.height = 180;
+
 
         params.gravity =
                 Gravity.TOP |
                 Gravity.RIGHT;
 
 
+
         params.format =
                 PixelFormat.TRANSLUCENT;
 
 
-        params.type =
-                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+
+
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+
+            params.type =
+                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+
+        }else{
+
+            params.type =
+                    WindowManager.LayoutParams.TYPE_PHONE;
+
+        }
+
+
 
 
         params.flags =
@@ -86,16 +105,82 @@ public class FloatingControlService extends Service {
 
 
 
-        floatingView = button;
+
+
+        floatingButton.setOnTouchListener(
+                (view,event)->{
+
+
+                    switch(event.getAction()){
+
+
+                        case MotionEvent.ACTION_DOWN:
+
+                            return true;
 
 
 
-        windowManager.addView(
-                floatingView,
-                params
-        );
+                        case MotionEvent.ACTION_MOVE:
+
+
+                            params.x =
+                                    (int)(event.getRawX());
+
+
+                            params.y =
+                                    (int)(event.getRawY());
+
+
+
+                            try{
+
+                                windowManager.updateViewLayout(
+                                        floatingButton,
+                                        params
+                                );
+
+
+                            }catch(Exception ignored){}
+
+
+
+                            return true;
+
+
+                    }
+
+
+                    return false;
+
+                });
+
+
+
+
+        try{
+
+
+            windowManager.addView(
+                    floatingButton,
+                    params
+            );
+
+
+        }catch(Exception e){
+
+
+            Toast.makeText(
+                    this,
+                    "Overlay permission required",
+                    Toast.LENGTH_LONG
+            ).show();
+
+
+        }
+
 
     }
+
 
 
 
@@ -106,13 +191,23 @@ public class FloatingControlService extends Service {
         super.onDestroy();
 
 
-        if(floatingView != null){
 
-            windowManager.removeView(
-                    floatingView
-            );
+        if(floatingButton != null){
+
+
+            try{
+
+                windowManager.removeView(
+                        floatingButton
+                );
+
+
+            }catch(Exception ignored){}
+
+
 
         }
+
 
     }
 
