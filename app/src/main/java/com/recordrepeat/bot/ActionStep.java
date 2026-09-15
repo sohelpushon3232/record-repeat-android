@@ -2,13 +2,23 @@ package com.recordrepeat.bot;
 
 public class ActionStep {
 
-    public String type;
-    public String data;
+    public String action;
+    public int x;
+    public int y;
+    public String text;
     public long delay;
 
-    public ActionStep(String type, String data, long delay) {
-        this.type = type;
-        this.data = data;
+    public ActionStep(
+            String action,
+            int x,
+            int y,
+            String text,
+            long delay
+    ) {
+        this.action = action;
+        this.x = x;
+        this.y = y;
+        this.text = text;
         this.delay = delay;
     }
 }
