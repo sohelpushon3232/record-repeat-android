@@ -3,6 +3,10 @@ package com.recordrepeat.bot;
 import android.app.Activity;
 import android.os.Bundle;
 import android.widget.*;
+import android.content.Intent;
+import android.provider.Settings;
+import android.net.Uri;
+import android.os.Build;
 
 import org.json.JSONArray;
 
@@ -30,6 +34,9 @@ public class MainActivity extends Activity {
     AutoRepeatEngine autoRepeatEngine;
 
 
+    Button floatingButton;
+
+
 
 
     @Override
@@ -38,17 +45,21 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
 
 
+
         recordManager =
                 RecordManager.getInstance();
+
 
 
 
         LinearLayout layout =
                 new LinearLayout(this);
 
+
         layout.setOrientation(
                 LinearLayout.VERTICAL
         );
+
 
         layout.setPadding(
                 30,30,30,30
@@ -56,8 +67,10 @@ public class MainActivity extends Activity {
 
 
 
+
         workflowName =
                 new EditText(this);
+
 
         workflowName.setHint(
                 "Workflow Name"
@@ -65,19 +78,25 @@ public class MainActivity extends Activity {
 
 
 
+
         repeatInput =
                 new EditText(this);
+
 
         repeatInput.setHint(
                 "Repeat Count"
         );
 
+
         repeatInput.setInputType(2);
+
+
 
 
 
         Button record =
                 new Button(this);
+
 
         record.setText(
                 "START RECORD"
@@ -85,8 +104,10 @@ public class MainActivity extends Activity {
 
 
 
+
         Button save =
                 new Button(this);
+
 
         save.setText(
                 "SAVE WORKFLOW"
@@ -94,8 +115,10 @@ public class MainActivity extends Activity {
 
 
 
+
         Button run =
                 new Button(this);
+
 
         run.setText(
                 "RUN SELECTED"
@@ -103,12 +126,26 @@ public class MainActivity extends Activity {
 
 
 
+
         Button stop =
                 new Button(this);
+
 
         stop.setText(
                 "STOP REPEAT"
         );
+
+
+
+
+        floatingButton =
+                new Button(this);
+
+
+        floatingButton.setText(
+                "START FLOATING BOT"
+        );
+
 
 
 
@@ -117,7 +154,11 @@ public class MainActivity extends Activity {
 
 
 
+
         loadWorkflows();
+
+
+
 
 
 
@@ -139,7 +180,10 @@ public class MainActivity extends Activity {
 
 
 
+
+
         save.setOnClickListener(v -> {
+
 
 
             String name =
@@ -154,6 +198,7 @@ public class MainActivity extends Activity {
                 name = "My Workflow";
 
             }
+
 
 
 
@@ -176,7 +221,11 @@ public class MainActivity extends Activity {
             ).show();
 
 
+
         });
+
+
+
 
 
 
@@ -186,8 +235,10 @@ public class MainActivity extends Activity {
                 (parent, view, position, id) -> {
 
 
+
                     selectedWorkflow =
                             names.get(position);
+
 
 
 
@@ -198,7 +249,9 @@ public class MainActivity extends Activity {
                     ).show();
 
 
+
                 });
+
 
 
 
@@ -227,13 +280,17 @@ public class MainActivity extends Activity {
 
 
 
+
+
             TouchRecorderService service =
                     TouchRecorderService.getInstance();
 
 
 
 
+
             if(service == null){
+
 
 
                 Toast.makeText(
@@ -251,11 +308,14 @@ public class MainActivity extends Activity {
 
 
 
+
+
             int count = 1;
 
 
 
             try{
+
 
                 count =
                 Integer.parseInt(
@@ -265,7 +325,11 @@ public class MainActivity extends Activity {
                 );
 
 
+
             }catch(Exception ignored){}
+
+
+
 
 
 
@@ -276,6 +340,7 @@ public class MainActivity extends Activity {
                             this,
                             selectedWorkflow
                     );
+
 
 
 
@@ -293,7 +358,9 @@ public class MainActivity extends Activity {
 
                 return;
 
+
             }
+
 
 
 
@@ -304,6 +371,9 @@ public class MainActivity extends Activity {
 
 
 
+
+
+
             autoRepeatEngine =
                     new AutoRepeatEngine(
                             replayEngine
@@ -311,10 +381,13 @@ public class MainActivity extends Activity {
 
 
 
+
+
             autoRepeatEngine.start(
                     steps,
                     count
             );
+
 
 
 
@@ -333,7 +406,12 @@ public class MainActivity extends Activity {
 
 
 
+
+
+
+
         stop.setOnClickListener(v -> {
+
 
 
             if(autoRepeatEngine != null){
@@ -343,6 +421,7 @@ public class MainActivity extends Activity {
             }
 
 
+
             Toast.makeText(
                     this,
                     "Automation Stopped",
@@ -350,7 +429,72 @@ public class MainActivity extends Activity {
             ).show();
 
 
+
         });
+
+
+
+
+
+
+
+
+
+        floatingButton.setOnClickListener(v -> {
+
+
+
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+                    && !Settings.canDrawOverlays(this)){
+
+
+
+                Intent intent =
+                        new Intent(
+                                Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                                Uri.parse(
+                                        "package:"+
+                                        getPackageName()
+                                )
+                        );
+
+
+
+                startActivity(intent);
+
+
+
+            }else{
+
+
+                Intent intent =
+                        new Intent(
+                                this,
+                                FloatingControlService.class
+                        );
+
+
+
+                startService(intent);
+
+
+
+                Toast.makeText(
+                        this,
+                        "Floating BOT Started",
+                        Toast.LENGTH_SHORT
+                ).show();
+
+
+            }
+
+
+
+        });
+
+
+
+
 
 
 
@@ -370,12 +514,17 @@ public class MainActivity extends Activity {
 
         layout.addView(stop);
 
+        layout.addView(floatingButton);
+
+
 
 
         setContentView(layout);
 
 
+
     }
+
 
 
 
@@ -396,6 +545,7 @@ public class MainActivity extends Activity {
 
 
 
+
         for(int i=0;i<array.length();i++){
 
 
@@ -403,8 +553,8 @@ public class MainActivity extends Activity {
 
 
                 names.add(
-                    array.getJSONObject(i)
-                    .getString("name")
+                        array.getJSONObject(i)
+                        .getString("name")
                 );
 
 
@@ -418,6 +568,8 @@ public class MainActivity extends Activity {
 
 
 
+
+
         workflowList.setAdapter(
                 new ArrayAdapter<>(
                         this,
@@ -426,7 +578,10 @@ public class MainActivity extends Activity {
                 )
         );
 
+
+
     }
+
 
 
 }
