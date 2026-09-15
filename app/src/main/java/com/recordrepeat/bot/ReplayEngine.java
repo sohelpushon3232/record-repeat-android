@@ -5,6 +5,7 @@ import android.accessibilityservice.GestureDescription;
 
 import java.util.ArrayList;
 
+
 public class ReplayEngine {
 
     private boolean running = false;
@@ -12,71 +13,98 @@ public class ReplayEngine {
     private AutomationAccessibilityService service;
 
 
-    public ReplayEngine(
-            AutomationAccessibilityService service
-    ){
+    public ReplayEngine(AutomationAccessibilityService service){
+
         this.service = service;
+
     }
 
 
     public void run(
-            ArrayList<ActionStep> steps
+            ArrayList<ActionStep> steps,
+            int repeatCount
     ){
 
         running = true;
 
+
         new Thread(() -> {
 
-            for(ActionStep step : steps){
 
-                if(!running){
-                    break;
-                }
-
-                try {
-
-                    Thread.sleep(1000);
+            for(int r = 0; r < repeatCount; r++){
 
 
-                    if(step.type.equals("CLICK")){
-
-                        String[] data =
-                                step.data.split(",");
+                for(ActionStep step : steps){
 
 
-                        float x =
-                                Float.parseFloat(data[0]);
-
-                        float y =
-                                Float.parseFloat(data[1]);
-
-
-                        performClick(x,y);
-
+                    if(!running){
+                        return;
                     }
 
 
-                } catch(Exception e){
+                    try{
 
-                    e.printStackTrace();
+                        Thread.sleep(
+                                step.delay
+                        );
+
+
+                        if(step.type.equals("CLICK")){
+
+
+                            String[] pos =
+                                    step.data.split(",");
+
+
+                            float x =
+                                    Float.parseFloat(pos[0]);
+
+
+                            float y =
+                                    Float.parseFloat(pos[1]);
+
+
+                            click(
+                                    x,
+                                    y
+                            );
+
+                        }
+
+
+                    }catch(Exception e){
+
+                        e.printStackTrace();
+
+                    }
 
                 }
 
             }
+
 
         }).start();
 
     }
 
 
-    private void performClick(
+
+    private void click(
             float x,
             float y
     ){
 
+        if(service == null){
+            return;
+        }
+
+
         Path path = new Path();
 
-        path.moveTo(x,y);
+        path.moveTo(
+                x,
+                y
+        );
 
 
         GestureDescription.StrokeDescription stroke =
@@ -102,9 +130,11 @@ public class ReplayEngine {
     }
 
 
+
     public void stop(){
 
         running = false;
 
     }
+
 }
