@@ -3,82 +3,163 @@ package com.recordrepeat.bot;
 import android.app.Activity;
 import android.os.Bundle;
 import android.widget.*;
-import android.view.View;
-import android.content.Intent;
+
+import java.util.List;
+
 
 public class MainActivity extends Activity {
 
-    Button startButton;
-    Button stopButton;
-    Button replayButton;
-    EditText repeatInput;
-    
+
     RecordManager recordManager;
 
+    ReplayEngine replayEngine;
+
+
+    EditText repeatInput;
+
+
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState){
+
         super.onCreate(savedInstanceState);
 
-        recordManager = new RecordManager(this);
 
-        LinearLayout layout = new LinearLayout(this);
-        layout.setOrientation(LinearLayout.VERTICAL);
+        recordManager =
+                new RecordManager(this);
 
-        repeatInput = new EditText(this);
-        repeatInput.setHint("Repeat count");
+
+        LinearLayout layout =
+                new LinearLayout(this);
+
+        layout.setOrientation(
+                LinearLayout.VERTICAL
+        );
+
+        layout.setPadding(
+                40,40,40,40
+        );
+
+
+
+        repeatInput =
+                new EditText(this);
+
+        repeatInput.setHint(
+                "Repeat Count"
+        );
+
         repeatInput.setInputType(2);
 
-        startButton = new Button(this);
-        startButton.setText("Start Record");
 
-        stopButton = new Button(this);
-        stopButton.setText("Stop Record");
 
-        replayButton = new Button(this);
-        replayButton.setText("Run Automation");
+        Button record =
+                new Button(this);
 
-        startButton.setOnClickListener(v -> {
-            Toast.makeText(this,
-                    "Recording Started",
-                    Toast.LENGTH_SHORT).show();
+        record.setText(
+                "START RECORD"
+        );
+
+
+
+        Button stop =
+                new Button(this);
+
+        stop.setText(
+                "STOP RECORD"
+        );
+
+
+
+        Button run =
+                new Button(this);
+
+        run.setText(
+                "RUN AUTOMATION"
+        );
+
+
+
+        record.setOnClickListener(v -> {
 
             recordManager.startRecording();
+
+            Toast.makeText(
+                    this,
+                    "Recording Started",
+                    Toast.LENGTH_SHORT
+            ).show();
+
         });
 
 
-        stopButton.setOnClickListener(v -> {
+
+        stop.setOnClickListener(v -> {
+
+
             recordManager.stopRecording();
 
-            Toast.makeText(this,
+
+            Toast.makeText(
+                    this,
                     "Recording Saved",
-                    Toast.LENGTH_SHORT).show();
+                    Toast.LENGTH_SHORT
+            ).show();
+
+
         });
 
 
-        replayButton.setOnClickListener(v -> {
+
+        run.setOnClickListener(v -> {
+
 
             int count = 1;
 
-            try {
-                count = Integer.parseInt(
-                        repeatInput.getText().toString()
+
+            try{
+
+                count =
+                Integer.parseInt(
+                    repeatInput.getText().toString()
                 );
-            } catch(Exception e){}
 
 
-            ReplayEngine engine =
+            }catch(Exception e){}
+
+
+
+            List<ActionStep> steps =
+                    recordManager.getSteps();
+
+
+
+            replayEngine =
                     new ReplayEngine(this);
 
-            engine.start(count);
+
+
+            replayEngine.start(
+                    count,
+                    steps
+            );
+
 
         });
 
 
+
         layout.addView(repeatInput);
-        layout.addView(startButton);
-        layout.addView(stopButton);
-        layout.addView(replayButton);
+
+        layout.addView(record);
+
+        layout.addView(stop);
+
+        layout.addView(run);
+
+
 
         setContentView(layout);
+
     }
+
 }
