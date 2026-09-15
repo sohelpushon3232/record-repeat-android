@@ -1,174 +1,227 @@
 package com.recordrepeat.bot;
 
 import android.accessibilityservice.AccessibilityService;
+import android.accessibilityservice.GestureDescription;
+
+import android.content.Intent;
+
+import android.graphics.Path;
+import android.graphics.Rect;
+
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
-import android.widget.Toast;
 
+import android.widget.Toast;
 
 public class TouchRecorderService extends AccessibilityService {
 
-
     private static TouchRecorderService instance;
 
-    private RecordManager recordManager;
+    private final Handler handler =
+            new Handler(Looper.getMainLooper());
 
+    private String lastPackage = "";
 
-    public static TouchRecorderService getInstance(){
-
+    public static TouchRecorderService getInstance() {
         return instance;
-
     }
 
-
     @Override
-    public void onServiceConnected(){
+    protected void onServiceConnected() {
 
         super.onServiceConnected();
 
         instance = this;
 
-        recordManager = new RecordManager(this);
-
-
         Toast.makeText(
                 this,
-                "Recorder Ready",
+                "Recorder Service Ready",
                 Toast.LENGTH_SHORT
         ).show();
-
     }
 
-
-
     @Override
-    public void onAccessibilityEvent(
-            AccessibilityEvent event
-    ){
+    public void onAccessibilityEvent(AccessibilityEvent event) {
 
-        if(event == null){
+        if (event == null) return;
+
+        RecordManager manager =
+                RecordManager.getInstance();
+
+        if (!manager.isRecording()) return;
+
+        String packageName = "";
+
+        if (event.getPackageName() != null) {
+            packageName = event.getPackageName().toString();
+        }
+
+        // নিজের app-এর button record করবে না
+        if ("com.recordrepeat.bot".equals(packageName)) {
             return;
         }
 
+        // APP CHANGE / OPEN APP
+        if (event.getEventType()
+                == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
 
+            if (!packageName.isEmpty()
+                    && !packageName.equals(lastPackage)) {
+
+                lastPackage = packageName;
+
+                manager.addStep(
+                        new ActionStep(
+                                "OPEN_APP",
+                                0,
+                                0,
+                                packageName,
+                                700
+                        )
+                );
+            }
+        }
 
         AccessibilityNodeInfo node =
                 event.getSource();
 
+        if (node == null) return;
 
+        // CLICK RECORD
+        if (event.getEventType()
+                == AccessibilityEvent.TYPE_VIEW_CLICKED) {
 
-        if(node == null){
-            return;
-        }
+            Rect rect = new Rect();
+            node.getBoundsInScreen(rect);
 
-
-
-        // CLICK EVENT RECORD
-
-        if(event.getEventType()
-                == AccessibilityEvent.TYPE_VIEW_CLICKED){
-
-
-            String label = "";
-
-
-            if(node.getText()!=null){
-
-                label = node.getText().toString();
-
-            }
-
-
-            ActionStep clickStep =
+            manager.addStep(
                     new ActionStep(
                             "CLICK",
-                            0,
-                            0,
-                            label,
-                            1000
-                    );
-
-
-            recordManager.addStep(clickStep);
-
-        }
-
-
-
-        // TEXT EVENT RECORD
-
-        if(event.getEventType()
-                == AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED){
-
-
-            String text = "";
-
-
-            if(node.getText()!=null){
-
-                text = node.getText().toString();
-
-            }
-
-
-            if(!text.isEmpty()){
-
-
-                ActionStep textStep =
-                        new ActionStep(
-                                "TEXT",
-                                0,
-                                0,
-                                text,
-                                1000
-                        );
-
-
-                recordManager.addStep(textStep);
-
-            }
-
-        }
-
-
-
-        // VIEW EVENT RECORD
-
-        if(node.getClassName()!=null){
-
-
-            ActionStep viewStep =
-                    new ActionStep(
-                            "VIEW",
-                            0,
-                            0,
-                            node.getClassName().toString(),
+                            rect.centerX(),
+                            rect.centerY(),
+                            "",
                             500
-                    );
-
-
-            recordManager.addStep(viewStep);
-
+                    )
+            );
         }
 
+        // TEXT RECORD
+        if (event.getEventType()
+                == AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED) {
+
+            if (node.isPassword()) {
+                return;
+            }
+
+            CharSequence value = node.getText();
+
+            if (value != null) {
+
+                String text = value.toString();
+
+                if (!text.isEmpty()) {
+
+                    manager.replaceLastText(
+                            new ActionStep(
+                                    "TEXT",
+                                    0,
+                                    0,
+                                    text,
+                                    300
+                            )
+                    );
+                }
+            }
+        }
     }
 
+    public void performTap(float x, float y) {
 
+        handler.post(() -> {
 
-    @Override
-    public void onInterrupt(){
+            Path path = new Path();
+            path.moveTo(x, y);
 
+            GestureDescription.StrokeDescription stroke =
+                    new GestureDescription.StrokeDescription(
+                            path,
+                            0,
+                            100
+                    );
+
+            GestureDescription gesture =
+                    new GestureDescription.Builder()
+                            .addStroke(stroke)
+                            .build();
+
+            dispatchGesture(
+                    gesture,
+                    null,
+                    null
+            );
+        });
     }
 
+    public void typeText(String text) {
 
+        handler.post(() -> {
+
+            AccessibilityNodeInfo root =
+                    getRootInActiveWindow();
+
+            if (root == null) return;
+
+            AccessibilityNodeInfo node =
+                    root.findFocus(
+                            AccessibilityNodeInfo.FOCUS_INPUT
+                    );
+
+            if (node == null) return;
+
+            Bundle args = new Bundle();
+
+            args.putCharSequence(
+                    AccessibilityNodeInfo
+                            .ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE,
+                    text
+            );
+
+            node.performAction(
+                    AccessibilityNodeInfo.ACTION_SET_TEXT,
+                    args
+            );
+        });
+    }
+
+    public void openApp(String packageName) {
+
+        handler.post(() -> {
+
+            Intent intent =
+                    getPackageManager()
+                            .getLaunchIntentForPackage(packageName);
+
+            if (intent != null) {
+
+                intent.addFlags(
+                        Intent.FLAG_ACTIVITY_NEW_TASK
+                );
+
+                startActivity(intent);
+            }
+        });
+    }
 
     @Override
-    public void onDestroy(){
+    public void onInterrupt() {}
 
+    @Override
+    public void onDestroy() {
         instance = null;
-
         super.onDestroy();
-
     }
-
 }
