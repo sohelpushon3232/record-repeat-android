@@ -8,13 +8,15 @@ import android.widget.Toast;
 
 public class MainActivity extends Activity {
 
-    RecordBot recordBot;
+    RecordManager recordManager;
+    ReplayEngine replayEngine;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        recordBot = new RecordBot();
+        recordManager = new RecordManager();
+        replayEngine = new ReplayEngine();
 
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
@@ -39,7 +41,7 @@ public class MainActivity extends Activity {
 
         record.setOnClickListener(v -> {
 
-            recordBot.startBot();
+            recordManager.clear();
 
             Toast.makeText(
                     this,
@@ -52,9 +54,14 @@ public class MainActivity extends Activity {
 
         stopRecord.setOnClickListener(v -> {
 
+            WorkflowStorage.save(
+                    this,
+                    recordManager.getSteps()
+            );
+
             Toast.makeText(
                     this,
-                    "Recording Saved",
+                    "Workflow Saved",
                     Toast.LENGTH_SHORT
             ).show();
 
@@ -63,11 +70,13 @@ public class MainActivity extends Activity {
 
         run.setOnClickListener(v -> {
 
-            recordBot.startBot();
+            replayEngine.run(
+                    recordManager.getSteps()
+            );
 
             Toast.makeText(
                     this,
-                    "Running Automation",
+                    "Automation Running",
                     Toast.LENGTH_SHORT
             ).show();
 
@@ -76,11 +85,11 @@ public class MainActivity extends Activity {
 
         stop.setOnClickListener(v -> {
 
-            recordBot.stopBot();
+            replayEngine.stop();
 
             Toast.makeText(
                     this,
-                    "Automation Stopped",
+                    "Stopped",
                     Toast.LENGTH_SHORT
             ).show();
 
