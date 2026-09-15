@@ -1,0 +1,19 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.recordrepeat.bot'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId "com.recordrepeat.bot"
+        minSdk 24
+        targetSdk 35
+        versionCode 1
+        versionName "1.0"
+    }
+}
+
+dependencies {
+}
