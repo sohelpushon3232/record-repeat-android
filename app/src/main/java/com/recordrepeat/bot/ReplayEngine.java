@@ -1,12 +1,11 @@
 package com.recordrepeat.bot;
 
-import android.accessibilityservice.GestureDescription;
 import android.graphics.Path;
+import android.accessibilityservice.GestureDescription;
+
 import java.util.ArrayList;
 
-
 public class ReplayEngine {
-
 
     private boolean running = false;
 
@@ -16,11 +15,8 @@ public class ReplayEngine {
     public ReplayEngine(
             AutomationAccessibilityService service
     ){
-
         this.service = service;
-
     }
-
 
 
     public void run(
@@ -29,44 +25,38 @@ public class ReplayEngine {
 
         running = true;
 
-
         new Thread(() -> {
 
-
             for(ActionStep step : steps){
-
 
                 if(!running){
                     break;
                 }
 
-
-                try{
+                try {
 
                     Thread.sleep(1000);
 
 
                     if(step.type.equals("CLICK")){
 
-
-                        String[] point =
+                        String[] data =
                                 step.data.split(",");
 
 
                         float x =
-                                Float.parseFloat(point[0]);
-
+                                Float.parseFloat(data[0]);
 
                         float y =
-                                Float.parseFloat(point[1]);
+                                Float.parseFloat(data[1]);
 
 
-                        click(x,y);
+                        performClick(x,y);
 
                     }
 
 
-                }catch(Exception e){
+                } catch(Exception e){
 
                     e.printStackTrace();
 
@@ -74,14 +64,12 @@ public class ReplayEngine {
 
             }
 
-
         }).start();
 
     }
 
 
-
-    private void click(
+    private void performClick(
             float x,
             float y
     ){
@@ -114,11 +102,9 @@ public class ReplayEngine {
     }
 
 
-
     public void stop(){
 
         running = false;
 
     }
-
 }
