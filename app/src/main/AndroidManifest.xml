@@ -7,7 +7,7 @@
         android:label="Record Repeat Bot"
         android:supportsRtl="true"
         android:icon="@drawable/robot_repeat_automation_icon"
-        android:theme="@style/Theme.Material.Light.NoActionBar">
+        android:theme="@android:style/Theme.Material.Light.NoActionBar">
 
 
         <activity
