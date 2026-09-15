@@ -51,62 +51,103 @@ public class TouchRecorderService extends AccessibilityService {
         }
 
 
+
         AccessibilityNodeInfo node =
                 event.getSource();
 
 
 
-        if(node != null){
+        if(node == null){
+            return;
+        }
 
 
-            // Text capture
 
-            if(node.getText() != null){
+        // CLICK EVENT RECORD
 
-                String text =
-                        node.getText().toString();
-
-
-                if(!text.isEmpty()){
+        if(event.getEventType()
+                == AccessibilityEvent.TYPE_VIEW_CLICKED){
 
 
-                    ActionStep textStep =
-                            new ActionStep(
-                                    "TEXT",
-                                    0,
-                                    0,
-                                    text,
-                                    1000
-                            );
+            String label = "";
 
 
-                    recordManager.addStep(textStep);
+            if(node.getText()!=null){
 
-                }
+                label = node.getText().toString();
 
             }
 
 
+            ActionStep clickStep =
+                    new ActionStep(
+                            "CLICK",
+                            0,
+                            0,
+                            label,
+                            1000
+                    );
 
-            // View/Class capture
 
-            if(node.getClassName() != null){
+            recordManager.addStep(clickStep);
+
+        }
 
 
-                ActionStep viewStep =
+
+        // TEXT EVENT RECORD
+
+        if(event.getEventType()
+                == AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED){
+
+
+            String text = "";
+
+
+            if(node.getText()!=null){
+
+                text = node.getText().toString();
+
+            }
+
+
+            if(!text.isEmpty()){
+
+
+                ActionStep textStep =
                         new ActionStep(
-                                "VIEW",
+                                "TEXT",
                                 0,
                                 0,
-                                node.getClassName().toString(),
-                                500
+                                text,
+                                1000
                         );
 
 
-                recordManager.addStep(viewStep);
+                recordManager.addStep(textStep);
 
             }
 
+        }
+
+
+
+        // VIEW EVENT RECORD
+
+        if(node.getClassName()!=null){
+
+
+            ActionStep viewStep =
+                    new ActionStep(
+                            "VIEW",
+                            0,
+                            0,
+                            node.getClassName().toString(),
+                            500
+                    );
+
+
+            recordManager.addStep(viewStep);
 
         }
 
@@ -118,6 +159,7 @@ public class TouchRecorderService extends AccessibilityService {
     public void onInterrupt(){
 
     }
+
 
 
     @Override
