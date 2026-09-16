@@ -1,21 +1,35 @@
 package com.recordrepeat.bot;
 
-import org.json.JSONObject;
-
 
 public class ActionStep {
 
 
-    // পুরোনো Record / Replay system
     public String action;
+
 
     public int x;
 
     public int y;
 
+
     public String text;
 
+
     public long delay;
+
+
+
+    // New smart information
+
+    public String viewText;
+
+    public String contentDescription;
+
+    public String className;
+
+    public String resourceId;
+
+
 
 
 
@@ -37,193 +51,58 @@ public class ActionStep {
 
         this.delay = delay;
 
-    }
 
+        this.viewText = "";
 
+        this.contentDescription = "";
 
-    // New-style getters
-    // Smart system compatibility এর জন্য রাখা হয়েছে
+        this.className = "";
 
-    public String getType(){
-
-        return action;
-
-    }
-
-
-    public int getX(){
-
-        return x;
-
-    }
-
-
-    public int getY(){
-
-        return y;
-
-    }
-
-
-    public String getValue(){
-
-        return text;
-
-    }
-
-
-    public long getDelay(){
-
-        return delay;
+        this.resourceId = "";
 
     }
 
 
 
-    public JSONObject toJSON(){
-
-        JSONObject object =
-                new JSONObject();
-
-        try{
-
-            // পুরোনো format
-            object.put(
-                    "action",
-                    action
-            );
-
-            object.put(
-                    "x",
-                    x
-            );
-
-            object.put(
-                    "y",
-                    y
-            );
-
-            object.put(
-                    "text",
-                    text
-            );
-
-            object.put(
-                    "delay",
-                    delay
-            );
-
-
-            // নতুন format compatibility
-            object.put(
-                    "type",
-                    action
-            );
-
-            object.put(
-                    "value",
-                    text
-            );
-
-
-        }catch(Exception e){
-
-            e.printStackTrace();
-
-        }
-
-
-        return object;
-
-    }
 
 
 
-    public static ActionStep fromJSON(
-            JSONObject object
+
+    public ActionStep(
+            String action,
+            int x,
+            int y,
+            String text,
+            long delay,
+            String viewText,
+            String contentDescription,
+            String className,
+            String resourceId
     ){
 
-        try{
 
-            String actionValue;
+        this.action = action;
 
-            String textValue;
+        this.x = x;
 
+        this.y = y;
 
-            // পুরোনো saved workflow হলে
-            if(object.has("action")){
+        this.text = text;
 
-                actionValue =
-                        object.optString(
-                                "action",
-                                ""
-                        );
-
-            }else{
-
-                // নতুন format হলে
-                actionValue =
-                        object.optString(
-                                "type",
-                                ""
-                        );
-
-            }
+        this.delay = delay;
 
 
+        this.viewText = viewText;
 
-            if(object.has("text")){
+        this.contentDescription = contentDescription;
 
-                textValue =
-                        object.optString(
-                                "text",
-                                ""
-                        );
+        this.className = className;
 
-            }else{
+        this.resourceId = resourceId;
 
-                textValue =
-                        object.optString(
-                                "value",
-                                ""
-                        );
-
-            }
-
-
-
-            return new ActionStep(
-
-                    actionValue,
-
-                    object.optInt(
-                            "x",
-                            0
-                    ),
-
-                    object.optInt(
-                            "y",
-                            0
-                    ),
-
-                    textValue,
-
-                    object.optLong(
-                            "delay",
-                            500
-                    )
-
-            );
-
-
-        }catch(Exception e){
-
-            e.printStackTrace();
-
-            return null;
-
-        }
 
     }
+
+
 
 }
