@@ -23,10 +23,15 @@ public class MainActivity extends Activity {
 
 
     ListView workflowList;
+    ListView smartWorkflowList;
 
 
     ArrayList<String> names =
             new ArrayList<>();
+    ArrayList<String> smartNames =
+        new ArrayList<>();
+
+String selectedSmartWorkflow = "";
 
 
     RecordManager recordManager;
@@ -208,6 +213,11 @@ public class MainActivity extends Activity {
 
         workflowList =
                 new ListView(this);
+        smartWorkflowList =
+        new ListView(this);
+
+
+loadSmartWorkflows();
 
 
 
@@ -294,6 +304,23 @@ public class MainActivity extends Activity {
 
 
                 });
+        smartWorkflowList.setOnItemClickListener(
+        (parent, view, position, id) -> {
+
+
+    selectedSmartWorkflow =
+            smartNames.get(position);
+
+
+
+    Toast.makeText(
+            this,
+            selectedSmartWorkflow+" selected",
+            Toast.LENGTH_SHORT
+    ).show();
+
+
+});
 
 
 
@@ -304,7 +331,7 @@ public class MainActivity extends Activity {
         run.setOnClickListener(v -> {
 
 
-            if(selectedWorkflow.isEmpty()){
+            if(selectedSmartWorkflow.isEmpty()){
 
 
                 Toast.makeText(
@@ -418,6 +445,50 @@ public class MainActivity extends Activity {
 
 
             loadWorkflows();
+            private void loadSmartWorkflows(){
+
+
+    smartNames.clear();
+
+
+    JSONArray array =
+            SmartWorkflowStorage.getWorkflows(this);
+
+
+
+    for(int i=0;i<array.length();i++){
+
+
+        try{
+
+
+            smartNames.add(
+                    array.getJSONObject(i)
+                    .getString("name")
+            );
+
+
+        }catch(Exception ignored){}
+
+
+    }
+
+
+
+
+
+    smartWorkflowList.setAdapter(
+
+            new ArrayAdapter<>(
+                    this,
+                    android.R.layout.simple_list_item_1,
+                    smartNames
+            )
+
+    );
+
+
+}
 
 
 
@@ -537,7 +608,8 @@ public class MainActivity extends Activity {
 
 
             engine.runWorkflow(
-                    selectedWorkflow
+        selectedSmartWorkflow
+);
             );
 
 
@@ -561,6 +633,7 @@ public class MainActivity extends Activity {
         layout.addView(save);
 
         layout.addView(workflowList);
+        layout.addView(smartWorkflowList);
 
         layout.addView(run);
 
