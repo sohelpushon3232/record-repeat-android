@@ -4,8 +4,6 @@ package com.recordrepeat.bot;
 import android.os.Handler;
 import android.os.Looper;
 
-import android.view.accessibility.AccessibilityNodeInfo;
-
 
 
 import java.util.ArrayList;
@@ -13,6 +11,7 @@ import java.util.ArrayList;
 
 
 public class SmartAutomationEngine {
+
 
 
     private TouchRecorderService service;
@@ -25,11 +24,24 @@ public class SmartAutomationEngine {
 
 
 
+    private SmartClickEngine clickEngine;
+
+
+
+
+
     public SmartAutomationEngine(
             TouchRecorderService service
     ){
 
         this.service = service;
+
+
+        clickEngine =
+                new SmartClickEngine(
+                        service
+                );
+
 
     }
 
@@ -44,10 +56,12 @@ public class SmartAutomationEngine {
     ){
 
 
+
         executeStep(
                 commands,
                 0
         );
+
 
 
     }
@@ -60,17 +74,23 @@ public class SmartAutomationEngine {
 
 
     private void executeStep(
+
             ArrayList<SmartCommand> commands,
+
             int index
+
     ){
 
 
 
         if(index >= commands.size()){
 
+
             return;
 
         }
+
+
 
 
 
@@ -80,9 +100,13 @@ public class SmartAutomationEngine {
 
 
 
+
+
+
         handler.postDelayed(
 
                 () -> {
+
 
 
                     runCommand(
@@ -100,7 +124,7 @@ public class SmartAutomationEngine {
 
                 },
 
-                command.getWaitTime()
+                command.getDelay()
 
         );
 
@@ -123,7 +147,7 @@ public class SmartAutomationEngine {
 
 
         String type =
-                command.getCommand();
+                command.getType();
 
 
 
@@ -134,120 +158,64 @@ public class SmartAutomationEngine {
 
 
 
-        if(type.equals("OPEN_APP")){
 
 
-            service.openApp(
-                    value
-            );
+        switch(type){
 
 
-        }
 
+            case "OPEN_APP":
 
 
+                service.openApp(
+                        value
+                );
 
 
+                break;
 
 
-        else if(type.equals("CLICK_TEXT")){
 
 
-            clickText(
-                    value
-            );
 
 
-        }
 
+            case "CLICK_TEXT":
 
 
+                clickEngine.clickText(
+                        value
+                );
 
 
+                break;
 
 
-        else if(type.equals("TYPE_TEXT")){
 
 
-            service.typeText(
-                    value
-            );
 
 
-        }
 
+            case "TYPE_TEXT":
 
 
+                service.typeText(
+                        value
+                );
 
 
+                break;
 
 
-        else if(type.equals("WAIT")){
 
 
-            // শুধু wait করবে
 
 
-        }
+            case "WAIT":
 
 
+                break;
 
-    }
-
-
-
-
-
-
-
-
-    private void clickText(
-            String text
-    ){
-
-
-        AccessibilityNodeInfo root =
-                service.getRootInActiveWindow();
-
-
-
-        if(root == null){
-
-            return;
-
-        }
-
-
-
-
-
-        ArrayList<AccessibilityNodeInfo> nodes =
-                new ArrayList<>();
-
-
-
-        findTextNodes(
-                root,
-                text,
-                nodes
-        );
-
-
-
-
-
-        if(!nodes.isEmpty()){
-
-
-            AccessibilityNodeInfo node =
-                    nodes.get(0);
-
-
-
-            node.performAction(
-                    AccessibilityNodeInfo
-                    .ACTION_CLICK
-            );
 
 
         }
@@ -256,68 +224,6 @@ public class SmartAutomationEngine {
 
     }
 
-
-
-
-
-
-
-
-
-    private void findTextNodes(
-            AccessibilityNodeInfo node,
-            String text,
-            ArrayList<AccessibilityNodeInfo> result
-    ){
-
-
-
-        if(node == null){
-
-            return;
-
-        }
-
-
-
-
-        if(node.getText()!=null
-                &&
-                node.getText()
-                .toString()
-                .equalsIgnoreCase(text)){
-
-
-            result.add(
-                    node
-            );
-
-
-        }
-
-
-
-
-
-        for(int i=0;i<node.getChildCount();i++){
-
-
-            findTextNodes(
-
-                    node.getChild(i),
-
-                    text,
-
-                    result
-
-            );
-
-
-        }
-
-
-
-    }
 
 
 
