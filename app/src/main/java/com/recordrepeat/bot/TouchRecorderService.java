@@ -1,30 +1,35 @@
 package com.recordrepeat.bot;
 
+
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.GestureDescription;
 
+
 import android.content.Intent;
+
 
 import android.graphics.Path;
 import android.graphics.Rect;
+
 
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 
+
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
+
 import android.widget.Toast;
+
 
 
 public class TouchRecorderService extends AccessibilityService {
 
 
+
     private static TouchRecorderService instance;
-
-
-    private boolean connected = false;
 
 
 
@@ -37,6 +42,15 @@ public class TouchRecorderService extends AccessibilityService {
 
     private String lastPackage = "";
 
+    private long lastClickTime = 0;
+
+    private int lastX = -1;
+
+    private int lastY = -1;
+
+
+
+
 
 
 
@@ -45,6 +59,9 @@ public class TouchRecorderService extends AccessibilityService {
         return instance;
 
     }
+
+
+
 
 
 
@@ -59,217 +76,24 @@ public class TouchRecorderService extends AccessibilityService {
 
 
 
-   @Override
-protected void onServiceConnected() {
-
-    super.onServiceConnected();
-
-
-    instance = this;
-
-
-    Toast.makeText(
-            this,
-            "Accessibility Connected",
-            Toast.LENGTH_SHORT
-    ).show();
-
-}
-
-
-
-
 
 
     @Override
-    public void onAccessibilityEvent(
-            AccessibilityEvent event
-    ){
+    protected void onServiceConnected(){
 
 
-        if(event == null) return;
+        super.onServiceConnected();
 
 
+        instance = this;
 
-        RecordManager manager =
-                RecordManager.getInstance();
 
 
-
-        if(!manager.isRecording()) return;
-
-
-
-
-        String packageName = "";
-
-
-
-        if(event.getPackageName()!=null){
-
-            packageName =
-                    event.getPackageName()
-                    .toString();
-
-        }
-
-
-
-
-
-        if("com.recordrepeat.bot"
-                .equals(packageName)){
-
-            return;
-
-        }
-
-
-
-
-
-        if(event.getEventType()
-                ==
-                AccessibilityEvent
-                .TYPE_WINDOW_STATE_CHANGED){
-
-
-
-            if(!packageName.isEmpty()
-                    &&
-                    !packageName.equals(lastPackage)){
-
-
-
-                lastPackage = packageName;
-
-
-
-                manager.addStep(
-
-                        new ActionStep(
-                                "OPEN_APP",
-                                0,
-                                0,
-                                packageName,
-                                700
-                        )
-
-                );
-
-
-            }
-
-
-        }
-
-
-
-
-
-
-
-        AccessibilityNodeInfo node =
-                event.getSource();
-
-
-
-        if(node == null) return;
-
-
-
-
-
-
-
-        if(event.getEventType()
-                ==
-                AccessibilityEvent
-                .TYPE_VIEW_CLICKED){
-
-
-
-            Rect rect =
-                    new Rect();
-
-
-            node.getBoundsInScreen(
-                    rect
-            );
-
-
-
-            manager.addStep(
-
-                    new ActionStep(
-                            "CLICK",
-                            rect.centerX(),
-                            rect.centerY(),
-                            "",
-                            500
-                    )
-
-            );
-
-
-        }
-
-
-
-
-
-
-
-        if(event.getEventType()
-                ==
-                AccessibilityEvent
-                .TYPE_VIEW_TEXT_CHANGED){
-
-
-
-            if(node.isPassword()){
-
-                return;
-
-            }
-
-
-
-
-            CharSequence value =
-                    node.getText();
-
-
-
-            if(value != null){
-
-
-
-                String text =
-                        value.toString();
-
-
-
-                if(!text.isEmpty()){
-
-
-                    manager.replaceLastText(
-
-                            new ActionStep(
-                                    "TEXT",
-                                    0,
-                                    0,
-                                    text,
-                                    300
-                            )
-
-                    );
-
-                }
-
-            }
-
-        }
+        Toast.makeText(
+                this,
+                "Accessibility Connected",
+                Toast.LENGTH_SHORT
+        ).show();
 
 
 
@@ -283,13 +107,364 @@ protected void onServiceConnected() {
 
 
 
+    @Override
+    public void onAccessibilityEvent(
+            AccessibilityEvent event
+    ){
+
+
+
+        if(event == null)
+            return;
+
+
+
+
+
+        RecordManager manager =
+                RecordManager.getInstance();
+
+
+
+
+
+        if(!manager.isRecording())
+            return;
+
+
+
+
+
+
+
+        String packageName = "";
+
+
+
+        if(event.getPackageName()!=null){
+
+
+            packageName =
+                    event.getPackageName()
+                    .toString();
+
+
+        }
+
+
+
+
+
+
+
+        if(packageName.equals(
+                getPackageName()
+        )){
+
+
+            return;
+
+
+        }
+
+
+
+
+
+
+
+        // APP CHANGE RECORD
+
+
+        if(event.getEventType()
+                ==
+                AccessibilityEvent
+                .TYPE_WINDOW_STATE_CHANGED){
+
+
+
+
+
+            if(!packageName.isEmpty()
+                    &&
+                    !packageName.equals(lastPackage)){
+
+
+
+                lastPackage =
+                        packageName;
+
+
+
+
+
+                manager.addStep(
+
+                        new ActionStep(
+
+                                "OPEN_APP",
+
+                                0,
+
+                                0,
+
+                                packageName,
+
+                                500
+
+                        )
+
+                );
+
+
+
+            }
+
+
+        }
+
+
+
+
+
+
+
+
+
+        AccessibilityNodeInfo node =
+                event.getSource();
+
+
+
+
+        if(node == null)
+            return;
+
+
+
+
+
+
+
+        // CLICK RECORD
+
+
+
+
+        if(event.getEventType()
+                ==
+                AccessibilityEvent
+                .TYPE_VIEW_CLICKED
+                ||
+
+                event.getEventType()
+                ==
+                AccessibilityEvent
+                .TYPE_VIEW_LONG_CLICKED){
+
+
+
+
+
+
+
+            Rect rect =
+                    new Rect();
+
+
+
+
+            node.getBoundsInScreen(
+                    rect
+            );
+
+
+
+
+
+            int x =
+                    rect.centerX();
+
+
+            int y =
+                    rect.centerY();
+
+
+
+
+
+
+
+
+            long now =
+                    System.currentTimeMillis();
+
+
+
+
+
+
+            // duplicate click block
+
+
+            if(x == lastX
+                    &&
+                    y == lastY
+                    &&
+                    now-lastClickTime < 500){
+
+
+
+                node.recycle();
+
+                return;
+
+
+            }
+
+
+
+
+
+
+            lastX = x;
+
+            lastY = y;
+
+            lastClickTime = now;
+
+
+
+
+
+
+            manager.addStep(
+
+                    new ActionStep(
+
+                            "CLICK",
+
+                            x,
+
+                            y,
+
+                            "",
+
+                            300
+
+                    )
+
+            );
+
+
+
+
+        }
+
+
+
+
+
+
+
+
+
+        // TEXT RECORD
+
+
+
+        if(event.getEventType()
+                ==
+                AccessibilityEvent
+                .TYPE_VIEW_TEXT_CHANGED
+                ||
+
+                event.getEventType()
+                ==
+                AccessibilityEvent
+                .TYPE_VIEW_FOCUSED){
+
+
+
+
+
+
+            CharSequence text =
+                    node.getText();
+
+
+
+
+
+            if(text != null){
+
+
+
+                String value =
+                        text.toString();
+
+
+
+
+
+                if(!value.isEmpty()
+                        &&
+                        !node.isPassword()){
+
+
+
+                    manager.replaceLastText(
+
+                            new ActionStep(
+
+                                    "TEXT",
+
+                                    0,
+
+                                    0,
+
+                                    value,
+
+                                    300
+
+                            )
+
+                    );
+
+
+                }
+
+
+
+            }
+
+
+        }
+
+
+
+
+
+
+        node.recycle();
+
+
+
+    }
+    
+
+
+
+
     public void performTap(
             float x,
             float y
     ){
 
 
+
         handler.post(() -> {
+
 
 
             Path path =
@@ -304,6 +479,8 @@ protected void onServiceConnected() {
 
 
 
+
+
             GestureDescription.StrokeDescription stroke =
 
                     new GestureDescription
@@ -315,11 +492,17 @@ protected void onServiceConnected() {
 
 
 
+
+
             GestureDescription gesture =
 
                     new GestureDescription.Builder()
+
                     .addStroke(stroke)
+
                     .build();
+
+
 
 
 
@@ -335,7 +518,9 @@ protected void onServiceConnected() {
         });
 
 
+
     }
+
 
 
 
@@ -349,15 +534,25 @@ protected void onServiceConnected() {
     ){
 
 
+
         handler.post(() -> {
 
 
+
             AccessibilityNodeInfo root =
+
                     getRootInActiveWindow();
 
 
 
-            if(root == null) return;
+
+
+
+            if(root == null)
+                return;
+
+
+
 
 
 
@@ -365,12 +560,21 @@ protected void onServiceConnected() {
             AccessibilityNodeInfo node =
 
                     root.findFocus(
-                            AccessibilityNodeInfo.FOCUS_INPUT
+
+                            AccessibilityNodeInfo
+                            .FOCUS_INPUT
+
                     );
 
 
 
-            if(node == null) return;
+
+
+
+            if(node == null)
+                return;
+
+
 
 
 
@@ -378,6 +582,8 @@ protected void onServiceConnected() {
 
             Bundle args =
                     new Bundle();
+
+
 
 
 
@@ -392,6 +598,10 @@ protected void onServiceConnected() {
 
 
 
+
+
+
+
             node.performAction(
 
                     AccessibilityNodeInfo
@@ -403,11 +613,14 @@ protected void onServiceConnected() {
 
 
 
+
+
         });
 
 
 
     }
+
 
 
 
@@ -421,7 +634,9 @@ protected void onServiceConnected() {
     ){
 
 
+
         handler.post(() -> {
+
 
 
             Intent intent =
@@ -433,15 +648,24 @@ protected void onServiceConnected() {
 
 
 
+
+
+
+
             if(intent != null){
 
 
+
                 intent.addFlags(
+
                         Intent.FLAG_ACTIVITY_NEW_TASK
+
                 );
 
 
+
                 startActivity(intent);
+
 
 
             }
@@ -451,7 +675,9 @@ protected void onServiceConnected() {
         });
 
 
+
     }
+
 
 
 
@@ -464,10 +690,10 @@ protected void onServiceConnected() {
     public void onInterrupt(){
 
 
-        connected = false;
-
-
     }
+
+
+
 
 
 
@@ -475,19 +701,30 @@ protected void onServiceConnected() {
 
 
     @Override
-public void onDestroy() {
+    public void onDestroy(){
 
 
-    if(instance == this){
 
-        instance = null;
+        if(instance == this){
+
+
+            instance = null;
+
+
+        }
+
+
+
+
+        super.onDestroy();
+
+
 
     }
 
 
-    super.onDestroy();
+
+
 
 }
-
-}
-
+    
