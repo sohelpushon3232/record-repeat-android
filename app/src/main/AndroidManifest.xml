@@ -10,15 +10,24 @@
     <application
 
         android:allowBackup="true"
+
         android:label="Record Repeat Bot"
+
+        android:icon="@mipmap/ic_launcher"
+
+        android:roundIcon="@mipmap/ic_launcher_round"
+
         android:supportsRtl="true"
+
         android:theme="@android:style/Theme.Material.Light.NoActionBar">
 
 
         <!-- Main App Screen -->
 
         <activity
+
             android:name=".MainActivity"
+
             android:exported="true">
 
 
@@ -55,6 +64,7 @@
             </intent-filter>
 
 
+
             <meta-data
 
                 android:name="android.accessibilityservice"
@@ -76,7 +86,6 @@
             android:name=".FloatingControlService"
 
             android:exported="false"/>
-
 
 
 
