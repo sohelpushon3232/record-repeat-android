@@ -3,26 +3,21 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
 
-    <!-- Floating Button Permission -->
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
 
 
     <application
 
-        <application
+        android:allowBackup="true"
 
-    android:allowBackup="true"
+        android:label="Record Repeat Bot"
 
-    android:label="Record Repeat Bot"
+        android:icon="@drawable/robot_repeat_automation_icon"
 
-    android:icon="@drawable/robot_repeat_automation_icon"
+        android:supportsRtl="true"
 
-    android:supportsRtl="true"
+        android:theme="@android:style/Theme.Material.Light.NoActionBar">
 
-    android:theme="@android:style/Theme.Material.Light.NoActionBar">
-
-
-        <!-- Main App Screen -->
 
         <activity
 
@@ -45,9 +40,6 @@
 
 
 
-
-        <!-- Accessibility Recorder Service -->
-
         <service
 
             android:name=".TouchRecorderService"
@@ -64,7 +56,6 @@
             </intent-filter>
 
 
-
             <meta-data
 
                 android:name="android.accessibilityservice"
@@ -78,15 +69,11 @@
 
 
 
-
-        <!-- Floating BOT Service -->
-
         <service
 
             android:name=".FloatingControlService"
 
             android:exported="false"/>
-
 
 
 
