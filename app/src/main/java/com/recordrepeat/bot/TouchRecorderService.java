@@ -17,65 +17,142 @@ import android.view.accessibility.AccessibilityNodeInfo;
 
 import android.widget.Toast;
 
+
 public class TouchRecorderService extends AccessibilityService {
 
+
     private static TouchRecorderService instance;
+
+
     private boolean connected = false;
 
+
+
     private final Handler handler =
-            new Handler(Looper.getMainLooper());
+            new Handler(
+                    Looper.getMainLooper()
+            );
+
+
 
     private String lastPackage = "";
 
-    public static TouchRecorderService getInstance() {
+
+
+
+    public static TouchRecorderService getInstance(){
+
         return instance;
+
     }
 
+
+
+    public static boolean isConnected(){
+
+        return instance != null;
+
+    }
+
+
+
+
+
+
     @Override
-    protected void onServiceConnected() {
+    protected void onServiceConnected(){
 
         super.onServiceConnected();
 
+
+
         instance = this;
+
+        connected = true;
+
+
 
         Toast.makeText(
                 this,
                 "Recorder Service Ready",
                 Toast.LENGTH_SHORT
         ).show();
+
+
     }
 
-    @Override
-    public void onAccessibilityEvent(AccessibilityEvent event) {
 
-        if (event == null) return;
+
+
+
+
+
+    @Override
+    public void onAccessibilityEvent(
+            AccessibilityEvent event
+    ){
+
+
+        if(event == null) return;
+
+
 
         RecordManager manager =
                 RecordManager.getInstance();
 
-        if (!manager.isRecording()) return;
+
+
+        if(!manager.isRecording()) return;
+
+
+
 
         String packageName = "";
 
-        if (event.getPackageName() != null) {
-            packageName = event.getPackageName().toString();
+
+
+        if(event.getPackageName()!=null){
+
+            packageName =
+                    event.getPackageName()
+                    .toString();
+
         }
 
-        // নিজের app-এর button record করবে না
-        if ("com.recordrepeat.bot".equals(packageName)) {
+
+
+
+
+        if("com.recordrepeat.bot"
+                .equals(packageName)){
+
             return;
+
         }
 
-        // APP CHANGE / OPEN APP
-        if (event.getEventType()
-                == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
 
-            if (!packageName.isEmpty()
-                    && !packageName.equals(lastPackage)) {
+
+
+
+        if(event.getEventType()
+                ==
+                AccessibilityEvent
+                .TYPE_WINDOW_STATE_CHANGED){
+
+
+
+            if(!packageName.isEmpty()
+                    &&
+                    !packageName.equals(lastPackage)){
+
+
 
                 lastPackage = packageName;
 
+
+
                 manager.addStep(
+
                         new ActionStep(
                                 "OPEN_APP",
                                 0,
@@ -83,23 +160,53 @@ public class TouchRecorderService extends AccessibilityService {
                                 packageName,
                                 700
                         )
+
                 );
+
+
             }
+
+
         }
+
+
+
+
+
+
 
         AccessibilityNodeInfo node =
                 event.getSource();
 
-        if (node == null) return;
 
-        // CLICK RECORD
-        if (event.getEventType()
-                == AccessibilityEvent.TYPE_VIEW_CLICKED) {
 
-            Rect rect = new Rect();
-            node.getBoundsInScreen(rect);
+        if(node == null) return;
+
+
+
+
+
+
+
+        if(event.getEventType()
+                ==
+                AccessibilityEvent
+                .TYPE_VIEW_CLICKED){
+
+
+
+            Rect rect =
+                    new Rect();
+
+
+            node.getBoundsInScreen(
+                    rect
+            );
+
+
 
             manager.addStep(
+
                     new ActionStep(
                             "CLICK",
                             rect.centerX(),
@@ -107,26 +214,53 @@ public class TouchRecorderService extends AccessibilityService {
                             "",
                             500
                     )
+
             );
+
+
         }
 
-        // TEXT RECORD
-        if (event.getEventType()
-                == AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED) {
 
-            if (node.isPassword()) {
+
+
+
+
+
+        if(event.getEventType()
+                ==
+                AccessibilityEvent
+                .TYPE_VIEW_TEXT_CHANGED){
+
+
+
+            if(node.isPassword()){
+
                 return;
+
             }
 
-            CharSequence value = node.getText();
 
-            if (value != null) {
 
-                String text = value.toString();
 
-                if (!text.isEmpty()) {
+            CharSequence value =
+                    node.getText();
+
+
+
+            if(value != null){
+
+
+
+                String text =
+                        value.toString();
+
+
+
+                if(!text.isEmpty()){
+
 
                     manager.replaceLastText(
+
                             new ActionStep(
                                     "TEXT",
                                     0,
@@ -134,95 +268,233 @@ public class TouchRecorderService extends AccessibilityService {
                                     text,
                                     300
                             )
+
                     );
+
                 }
+
             }
+
         }
+
+
+
     }
 
-    public void performTap(float x, float y) {
+
+
+
+
+
+
+
+
+    public void performTap(
+            float x,
+            float y
+    ){
+
 
         handler.post(() -> {
 
-            Path path = new Path();
-            path.moveTo(x, y);
+
+            Path path =
+                    new Path();
+
+
+
+            path.moveTo(
+                    x,
+                    y
+            );
+
+
 
             GestureDescription.StrokeDescription stroke =
-                    new GestureDescription.StrokeDescription(
+
+                    new GestureDescription
+                    .StrokeDescription(
                             path,
                             0,
                             100
                     );
 
+
+
             GestureDescription gesture =
+
                     new GestureDescription.Builder()
-                            .addStroke(stroke)
-                            .build();
+                    .addStroke(stroke)
+                    .build();
+
+
+
 
             dispatchGesture(
                     gesture,
                     null,
                     null
             );
+
+
+
         });
+
+
     }
 
-    public void typeText(String text) {
+
+
+
+
+
+
+
+    public void typeText(
+            String text
+    ){
+
 
         handler.post(() -> {
+
 
             AccessibilityNodeInfo root =
                     getRootInActiveWindow();
 
-            if (root == null) return;
+
+
+            if(root == null) return;
+
+
+
 
             AccessibilityNodeInfo node =
+
                     root.findFocus(
                             AccessibilityNodeInfo.FOCUS_INPUT
                     );
 
-            if (node == null) return;
 
-            Bundle args = new Bundle();
+
+            if(node == null) return;
+
+
+
+
+
+            Bundle args =
+                    new Bundle();
+
+
 
             args.putCharSequence(
+
                     AccessibilityNodeInfo
-                            .ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE,
+                    .ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE,
+
                     text
+
             );
+
+
 
             node.performAction(
-                    AccessibilityNodeInfo.ACTION_SET_TEXT,
+
+                    AccessibilityNodeInfo
+                    .ACTION_SET_TEXT,
+
                     args
+
             );
+
+
+
         });
+
+
+
     }
 
-    public void openApp(String packageName) {
+
+
+
+
+
+
+
+    public void openApp(
+            String packageName
+    ){
+
 
         handler.post(() -> {
 
-            Intent intent =
-                    getPackageManager()
-                            .getLaunchIntentForPackage(packageName);
 
-            if (intent != null) {
+            Intent intent =
+
+                    getPackageManager()
+                    .getLaunchIntentForPackage(
+                            packageName
+                    );
+
+
+
+            if(intent != null){
+
 
                 intent.addFlags(
                         Intent.FLAG_ACTIVITY_NEW_TASK
                 );
 
+
                 startActivity(intent);
+
+
             }
+
+
+
         });
+
+
     }
 
-    @Override
-    public void onInterrupt() {}
+
+
+
+
+
+
 
     @Override
-    public void onDestroy() {
-        instance = null;
+    public void onInterrupt(){
+
+
+        connected = false;
+
+
+    }
+
+
+
+
+
+
+    @Override
+    public void onDestroy(){
+
+
+        connected = false;
+
+
+        // instance clear না করে রাখা হচ্ছে
+        // যাতে reconnect issue কম হয়
+
+
         super.onDestroy();
+
+
     }
+
+
 }
