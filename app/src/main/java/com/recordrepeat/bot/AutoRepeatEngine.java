@@ -1,6 +1,9 @@
 package com.recordrepeat.bot;
 
 
+import android.view.accessibility.AccessibilityNodeInfo;
+
+
 import java.util.List;
 
 
@@ -8,13 +11,16 @@ import java.util.List;
 public class AutoRepeatEngine {
 
 
-    private volatile boolean running = false;
-
 
     private TouchRecorderService service;
 
 
+    private volatile boolean running = false;
+
+
+
     private Thread worker;
+
 
 
 
@@ -35,7 +41,7 @@ public class AutoRepeatEngine {
 
 
 
-    public synchronized void start(
+    public void start(
 
             List<ActionStep> steps,
 
@@ -45,16 +51,17 @@ public class AutoRepeatEngine {
 
 
 
-        stop();
-
-
-
         if(service == null || steps == null){
 
             return;
 
         }
 
+
+
+
+
+        stop();
 
 
 
@@ -68,65 +75,51 @@ public class AutoRepeatEngine {
 
 
 
-            try {
-
-
-
-                int current = 0;
+            int count = 0;
 
 
 
 
 
-                while(
-                        running &&
-                        (
-                        repeatCount == 0 ||
-                        current < repeatCount
-                        )
-                ){
-
-
-
-                    for(ActionStep step : steps){
-
-
-
-                        if(!running){
-
-                            return;
-
-                        }
+            while(
+                    running
+                    &&
+                    (
+                    repeatCount == 0
+                    ||
+                    count < repeatCount
+                    )
+            ){
 
 
 
 
 
-
-                        long delay =
-                                step.delay;
+                for(ActionStep step : steps){
 
 
 
-                        if(delay > 1500){
+                    if(!running){
 
-                            delay = 800;
+                        return;
 
-                        }
-
-
-
-                        if(delay < 100){
-
-                            delay = 100;
-
-                        }
+                    }
 
 
 
 
 
-                        Thread.sleep(delay);
+
+                    try{
+
+
+
+                        Thread.sleep(
+                                Math.max(
+                                        300,
+                                        step.delay
+                                )
+                        );
 
 
 
@@ -136,12 +129,14 @@ public class AutoRepeatEngine {
 
 
 
+
+                    }catch(Exception e){
+
+
+                        e.printStackTrace();
+
+
                     }
-
-
-
-
-                    current++;
 
 
 
@@ -151,17 +146,7 @@ public class AutoRepeatEngine {
 
 
 
-            }catch(Exception e){
-
-
-                e.printStackTrace();
-
-
-
-            }finally{
-
-
-                running = false;
+                count++;
 
 
             }
@@ -169,8 +154,12 @@ public class AutoRepeatEngine {
 
 
 
+            running = false;
+
+
 
         });
+
 
 
 
@@ -195,13 +184,6 @@ public class AutoRepeatEngine {
 
 
 
-        if(service == null)
-            return;
-
-
-
-
-
         switch(step.action){
 
 
@@ -209,18 +191,30 @@ public class AutoRepeatEngine {
             case "CLICK":
 
 
+                boolean clicked =
 
-                service.performTap(
+                        clickSmartElement(
+                                step
+                        );
 
-                        step.x,
 
-                        step.y
 
-                );
+                if(!clicked){
+
+
+                    service.performTap(
+
+                            step.x,
+
+                            step.y
+
+                    );
+
+
+                }
 
 
                 break;
-
 
 
 
@@ -230,11 +224,8 @@ public class AutoRepeatEngine {
             case "TEXT":
 
 
-
                 service.typeText(
-
                         step.text
-
                 );
 
 
@@ -245,15 +236,11 @@ public class AutoRepeatEngine {
 
 
 
-
             case "OPEN_APP":
 
 
-
                 service.openApp(
-
                         step.text
-
                 );
 
 
@@ -275,8 +262,226 @@ public class AutoRepeatEngine {
 
 
 
-    public synchronized void stop(){
+    private boolean clickSmartElement(
+            ActionStep step
+    ){
 
+
+
+        AccessibilityNodeInfo root =
+
+                service.getRootInActiveWindow();
+
+
+
+
+
+
+        if(root == null){
+
+            return false;
+
+        }
+
+
+
+
+
+
+
+        AccessibilityNodeInfo target =
+
+                findNode(
+                        root,
+                        step
+                );
+
+
+
+
+
+
+
+        if(target != null){
+
+
+
+            target.performAction(
+
+                    AccessibilityNodeInfo
+                    .ACTION_CLICK
+
+            );
+
+
+
+            target.recycle();
+
+
+            root.recycle();
+
+
+
+            return true;
+
+
+        }
+
+
+
+
+
+        root.recycle();
+
+
+        return false;
+
+
+    }
+
+
+
+
+
+
+
+
+
+    private AccessibilityNodeInfo findNode(
+
+            AccessibilityNodeInfo node,
+
+            ActionStep step
+
+    ){
+
+
+
+        if(node == null){
+
+            return null;
+
+        }
+
+
+
+
+
+
+
+        String text = "";
+
+
+
+        if(node.getText()!=null){
+
+
+            text =
+                    node.getText()
+                    .toString();
+
+
+        }
+
+
+
+
+
+
+
+        String desc = "";
+
+
+
+        if(node.getContentDescription()!=null){
+
+
+            desc =
+                    node.getContentDescription()
+                    .toString();
+
+
+        }
+
+
+
+
+
+
+
+        if(
+                (!step.viewText.isEmpty()
+                &&
+                step.viewText.equals(text))
+
+                ||
+
+                (!step.contentDescription.isEmpty()
+                &&
+                step.contentDescription.equals(desc))
+        ){
+
+
+            return node;
+
+
+        }
+
+
+
+
+
+
+
+        for(int i=0;i<node.getChildCount();i++){
+
+
+
+            AccessibilityNodeInfo child =
+
+                    findNode(
+
+                            node.getChild(i),
+
+                            step
+
+                    );
+
+
+
+
+
+            if(child != null){
+
+
+                return child;
+
+
+            }
+
+
+        }
+
+
+
+
+
+
+        return null;
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    public void stop(){
 
 
         running = false;
@@ -293,20 +498,6 @@ public class AutoRepeatEngine {
 
 
         }
-
-
-    }
-
-
-
-
-
-
-
-    public boolean isRunning(){
-
-
-        return running;
 
 
     }
