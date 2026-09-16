@@ -239,109 +239,155 @@ public class TouchRecorderService extends AccessibilityService {
 
 
 
-        // CLICK RECORD
+        // SMART CLICK RECORD
 
-
-        if(event.getEventType()
-                ==
-                AccessibilityEvent.TYPE_VIEW_CLICKED){
-
-
-
-            Rect rect =
-                    new Rect();
+if(event.getEventType()
+        ==
+        AccessibilityEvent.TYPE_VIEW_CLICKED){
 
 
 
-            node.getBoundsInScreen(
-                    rect
-            );
+    AccessibilityNodeInfo clickNode =
+            event.getSource();
 
 
 
+    if(clickNode == null){
 
-            int x =
-                    rect.centerX();
+        return;
 
-
-            int y =
-                    rect.centerY();
+    }
 
 
 
 
 
+    Rect rect =
+            new Rect();
 
-            if(x <= 0 || y <= 0){
 
 
-                node.recycle();
-
-                return;
-
-            }
-
+    clickNode.getBoundsInScreen(
+            rect
+    );
 
 
 
 
 
-            long now =
-                    System.currentTimeMillis();
+    int x =
+            rect.centerX();
+
+
+    int y =
+            rect.centerY();
 
 
 
 
 
 
-            if(x == lastX
-                    &&
-                    y == lastY
-                    &&
-                    now-lastClickTime < 600){
+    String viewText = "";
 
+    String description = "";
 
-                node.recycle();
+    String className = "";
 
-                return;
-
-            }
-
-
-
-
-
-            lastX = x;
-
-            lastY = y;
-
-            lastClickTime = now;
+    String resourceId = "";
 
 
 
 
 
 
-            manager.addStep(
+    if(clickNode.getText()!=null){
 
-                    new ActionStep(
+        viewText =
+                clickNode.getText()
+                .toString();
 
-                            "CLICK",
-
-                            x,
-
-                            y,
-
-                            "",
-
-                            400
-
-                    )
-
-            );
+    }
 
 
-        }
+
+
+
+
+    if(clickNode.getContentDescription()!=null){
+
+        description =
+                clickNode.getContentDescription()
+                .toString();
+
+    }
+
+
+
+
+
+
+    if(clickNode.getClassName()!=null){
+
+        className =
+                clickNode.getClassName()
+                .toString();
+
+    }
+
+
+
+
+
+
+    if(clickNode.getViewIdResourceName()!=null){
+
+        resourceId =
+                clickNode.getViewIdResourceName();
+
+    }
+
+
+
+
+
+
+
+
+    manager.addStep(
+
+            new ActionStep(
+
+                    "CLICK",
+
+                    x,
+
+                    y,
+
+                    "",
+
+                    400,
+
+                    viewText,
+
+                    description,
+
+                    className,
+
+                    resourceId
+
+            )
+
+    );
+
+
+
+
+
+    clickNode.recycle();
+
+
+
+}
                 // TEXT RECORD
 
 
