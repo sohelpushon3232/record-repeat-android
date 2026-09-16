@@ -14,11 +14,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 
+
 public class MainActivity extends Activity {
 
 
     EditText workflowName;
     EditText repeatInput;
+
 
     ListView workflowList;
 
@@ -36,9 +38,13 @@ public class MainActivity extends Activity {
     AutoRepeatEngine autoRepeatEngine;
 
 
+
     Button floatingButton;
 
     Button smartBuilderButton;
+
+    Button smartRunButton;
+
 
 
 
@@ -75,6 +81,7 @@ public class MainActivity extends Activity {
 
 
 
+
         workflowName =
                 new EditText(this);
 
@@ -82,6 +89,7 @@ public class MainActivity extends Activity {
         workflowName.setHint(
                 "Workflow Name"
         );
+
 
 
 
@@ -100,6 +108,8 @@ public class MainActivity extends Activity {
 
 
 
+
+
         Button record =
                 new Button(this);
 
@@ -107,6 +117,7 @@ public class MainActivity extends Activity {
         record.setText(
                 "START RECORD"
         );
+
 
 
 
@@ -122,6 +133,7 @@ public class MainActivity extends Activity {
 
 
 
+
         Button run =
                 new Button(this);
 
@@ -129,6 +141,7 @@ public class MainActivity extends Activity {
         run.setText(
                 "RUN SELECTED"
         );
+
 
 
 
@@ -144,6 +157,7 @@ public class MainActivity extends Activity {
 
 
 
+
         Button delete =
                 new Button(this);
 
@@ -151,6 +165,7 @@ public class MainActivity extends Activity {
         delete.setText(
                 "DELETE WORKFLOW"
         );
+
 
 
 
@@ -166,6 +181,7 @@ public class MainActivity extends Activity {
 
 
 
+
         smartBuilderButton =
                 new Button(this);
 
@@ -173,6 +189,19 @@ public class MainActivity extends Activity {
         smartBuilderButton.setText(
                 "SMART BUILDER"
         );
+
+
+
+
+
+        smartRunButton =
+                new Button(this);
+
+
+        smartRunButton.setText(
+                "SMART RUN"
+        );
+
 
 
 
@@ -202,7 +231,6 @@ public class MainActivity extends Activity {
 
 
 
-
         save.setOnClickListener(v -> {
 
 
@@ -218,6 +246,7 @@ public class MainActivity extends Activity {
                 name = "My Workflow";
 
             }
+
 
 
 
@@ -241,7 +270,6 @@ public class MainActivity extends Activity {
 
 
         });
-
 
 
 
@@ -273,9 +301,7 @@ public class MainActivity extends Activity {
 
 
 
-
         run.setOnClickListener(v -> {
-
 
 
             if(selectedWorkflow.isEmpty()){
@@ -318,34 +344,11 @@ public class MainActivity extends Activity {
 
 
 
-
-            int count = 1;
-
-
-
-            try{
-
-
-                count =
-                Integer.parseInt(
-                        repeatInput
-                        .getText()
-                        .toString()
-                );
-
-
-            }catch(Exception ignored){}
-
-
-
-
-
             List<ActionStep> steps =
                     WorkflowStorage.loadWorkflow(
                             this,
                             selectedWorkflow
                     );
-
 
 
 
@@ -359,17 +362,8 @@ public class MainActivity extends Activity {
 
             autoRepeatEngine.start(
                     steps,
-                    count
+                    1
             );
-
-
-
-
-            Toast.makeText(
-                    this,
-                    "Auto Repeat Started",
-                    Toast.LENGTH_SHORT
-            ).show();
 
 
 
@@ -385,19 +379,12 @@ public class MainActivity extends Activity {
         stop.setOnClickListener(v -> {
 
 
+
             if(autoRepeatEngine != null){
 
                 autoRepeatEngine.stop();
 
             }
-
-
-            Toast.makeText(
-                    this,
-                    "Automation Stopped",
-                    Toast.LENGTH_SHORT
-            ).show();
-
 
 
         });
@@ -408,24 +395,15 @@ public class MainActivity extends Activity {
 
 
 
-
         delete.setOnClickListener(v -> {
+
 
 
             if(selectedWorkflow.isEmpty()){
 
-
-                Toast.makeText(
-                        this,
-                        "Select workflow first",
-                        Toast.LENGTH_SHORT
-                ).show();
-
-
                 return;
 
             }
-
 
 
 
@@ -437,7 +415,6 @@ public class MainActivity extends Activity {
 
 
             selectedWorkflow = "";
-
 
 
             loadWorkflows();
@@ -454,6 +431,7 @@ public class MainActivity extends Activity {
 
 
         floatingButton.setOnClickListener(v -> {
+
 
 
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
@@ -522,6 +500,58 @@ public class MainActivity extends Activity {
 
 
 
+        smartRunButton.setOnClickListener(v -> {
+
+
+
+            if(selectedWorkflow.isEmpty()){
+
+
+                Toast.makeText(
+                        this,
+                        "Select Smart Workflow",
+                        Toast.LENGTH_SHORT
+                ).show();
+
+
+                return;
+
+            }
+
+
+
+
+            TouchRecorderService service =
+                    TouchRecorderService.getInstance();
+
+
+
+
+            SmartRunEngine engine =
+                    new SmartRunEngine(
+                            this,
+                            service
+                    );
+
+
+
+
+            engine.runWorkflow(
+                    selectedWorkflow
+            );
+
+
+
+        });
+
+
+
+
+
+
+
+
+
         layout.addView(workflowName);
 
         layout.addView(repeatInput);
@@ -542,6 +572,9 @@ public class MainActivity extends Activity {
 
         layout.addView(smartBuilderButton);
 
+        layout.addView(smartRunButton);
+
+
 
 
         setContentView(layout);
@@ -549,7 +582,6 @@ public class MainActivity extends Activity {
 
 
     }
-
 
 
 
