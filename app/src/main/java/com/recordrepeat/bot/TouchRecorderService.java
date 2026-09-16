@@ -53,6 +53,7 @@ public class TouchRecorderService extends AccessibilityService {
 
 
 
+
     public static TouchRecorderService getInstance(){
 
         return instance;
@@ -110,6 +111,7 @@ public class TouchRecorderService extends AccessibilityService {
     ){
 
 
+
         if(event == null){
 
             return;
@@ -137,7 +139,6 @@ public class TouchRecorderService extends AccessibilityService {
 
 
 
-
         String packageName = "";
 
 
@@ -149,7 +150,6 @@ public class TouchRecorderService extends AccessibilityService {
                     event.getPackageName()
                     .toString();
 
-
         }
 
 
@@ -160,9 +160,7 @@ public class TouchRecorderService extends AccessibilityService {
 
         if(packageName.equals(getPackageName())){
 
-
             return;
-
 
         }
 
@@ -210,6 +208,7 @@ public class TouchRecorderService extends AccessibilityService {
 
                 );
 
+
             }
 
 
@@ -239,156 +238,202 @@ public class TouchRecorderService extends AccessibilityService {
 
 
 
+
+
+
         // SMART CLICK RECORD
 
-if(event.getEventType()
-        ==
-        AccessibilityEvent.TYPE_VIEW_CLICKED){
 
+        if(event.getEventType()
+                ==
+                AccessibilityEvent.TYPE_VIEW_CLICKED){
 
 
-    AccessibilityNodeInfo clickNode =
-            event.getSource();
 
+            Rect rect =
+                    new Rect();
 
 
-    if(clickNode == null){
 
-        return;
+            node.getBoundsInScreen(
+                    rect
+            );
 
-    }
 
 
 
 
+            int x =
+                    rect.centerX();
 
-    Rect rect =
-            new Rect();
 
 
+            int y =
+                    rect.centerY();
 
-    clickNode.getBoundsInScreen(
-            rect
-    );
 
 
 
 
 
-    int x =
-            rect.centerX();
+            if(x <= 0 || y <= 0){
 
+                return;
 
-    int y =
-            rect.centerY();
+            }
 
 
 
 
 
 
-    String viewText = "";
 
-    String description = "";
+            long now =
+                    System.currentTimeMillis();
 
-    String className = "";
 
-    String resourceId = "";
 
 
 
+            if(x == lastX
+                    &&
+                    y == lastY
+                    &&
+                    now-lastClickTime < 600){
 
 
+                return;
 
-    if(clickNode.getText()!=null){
+            }
 
-        viewText =
-                clickNode.getText()
-                .toString();
 
-    }
 
 
 
 
+            lastX = x;
 
+            lastY = y;
 
-    if(clickNode.getContentDescription()!=null){
+            lastClickTime = now;
 
-        description =
-                clickNode.getContentDescription()
-                .toString();
 
-    }
 
 
 
 
 
+            String viewText = "";
 
-    if(clickNode.getClassName()!=null){
+            String description = "";
 
-        className =
-                clickNode.getClassName()
-                .toString();
+            String className = "";
 
-    }
+            String resourceId = "";
 
 
 
 
 
 
-    if(clickNode.getViewIdResourceName()!=null){
 
-        resourceId =
-                clickNode.getViewIdResourceName();
+            if(node.getText()!=null){
 
-    }
 
+                viewText =
+                        node.getText()
+                        .toString();
 
 
+            }
 
 
 
 
 
-    manager.addStep(
 
-            new ActionStep(
 
-                    "CLICK",
+            if(node.getContentDescription()!=null){
 
-                    x,
 
-                    y,
+                description =
+                        node.getContentDescription()
+                        .toString();
 
-                    "",
 
-                    400,
+            }
 
-                    viewText,
 
-                    description,
 
-                    className,
 
-                    resourceId
 
-            )
 
-    );
 
+            if(node.getClassName()!=null){
 
 
+                className =
+                        node.getClassName()
+                        .toString();
 
 
-    clickNode.recycle();
+            }
 
 
 
-}
-                // TEXT RECORD
+
+
+
+
+            if(node.getViewIdResourceName()!=null){
+
+
+                resourceId =
+                        node.getViewIdResourceName();
+
+
+            }
+
+
+
+
+
+
+
+            manager.addStep(
+
+                    new ActionStep(
+
+                            "CLICK",
+
+                            x,
+
+                            y,
+
+                            "",
+
+                            400,
+
+                            viewText,
+
+                            description,
+
+                            className,
+
+                            resourceId
+
+                    )
+
+            );
+
+
+
+        }
+        
+
+
+
+        // TEXT RECORD
 
 
         if(event.getEventType()
@@ -444,7 +489,9 @@ if(event.getEventType()
                     }
 
 
+
                 }
+
 
 
             }
@@ -452,7 +499,6 @@ if(event.getEventType()
 
 
         }
-
 
 
 
@@ -702,7 +748,9 @@ if(event.getEventType()
 
 
                 intent.addFlags(
+
                         Intent.FLAG_ACTIVITY_NEW_TASK
+
                 );
 
 
@@ -766,7 +814,6 @@ if(event.getEventType()
 
 
     }
-
 
 
 
