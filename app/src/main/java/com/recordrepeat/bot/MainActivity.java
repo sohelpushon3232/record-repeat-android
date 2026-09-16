@@ -404,20 +404,30 @@ public class MainActivity extends Activity {
 
 
 
-
-            if(service == null){
-
-
-                Toast.makeText(
-                        this,
-                        "Enable Accessibility First",
-                        Toast.LENGTH_LONG
-                ).show();
+if(service == null){
 
 
-                return;
+    Toast.makeText(
+            this,
+            "Accessibility reconnecting...",
+            Toast.LENGTH_LONG
+    ).show();
 
-            }
+
+    Intent intent =
+            new Intent(
+                    Settings.ACTION_ACCESSIBILITY_SETTINGS
+            );
+
+
+    startActivity(intent);
+
+
+    return;
+
+}
+
+            
 
 
 
