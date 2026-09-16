@@ -1,75 +1,277 @@
 package com.recordrepeat.bot;
 
+
 import java.util.List;
+
+
 
 public class ReplayEngine {
 
+
     private final TouchRecorderService service;
+
 
     private volatile boolean running = false;
 
-    public ReplayEngine(TouchRecorderService service) {
+
+    private Thread replayThread;
+
+
+
+
+
+    public ReplayEngine(
+            TouchRecorderService service
+    ){
+
         this.service = service;
+
     }
 
-    public void start(
-            List<ActionStep> steps,
-            int repeatCount
-    ) {
 
-        if (service == null) return;
+
+
+
+
+
+
+    public void start(
+
+            List<ActionStep> steps,
+
+            int repeatCount
+
+    ){
+
+
+
+        if(service == null || steps == null)
+            return;
+
+
+
+
+
+        stop();
+
+
 
         running = true;
 
-        new Thread(() -> {
 
-            for (int r = 0;
-                 r < repeatCount && running;
-                 r++) {
 
-                for (ActionStep step : steps) {
 
-                    if (!running) return;
 
-                    try {
+        replayThread = new Thread(() -> {
 
-                        Thread.sleep(
-                                Math.max(100, step.delay)
-                        );
 
-                        switch (step.action) {
+
+            try {
+
+
+
+                for(int r = 0;
+                    r < repeatCount && running;
+                    r++){
+
+
+
+
+
+                    for(ActionStep step : steps){
+
+
+
+                        if(!running)
+                            return;
+
+
+
+
+
+
+                        long delay =
+                                step.delay;
+
+
+
+
+
+                        // delay optimize
+
+                        if(delay > 1500){
+
+                            delay = 1000;
+
+                        }
+
+
+
+                        if(delay < 150){
+
+                            delay = 150;
+
+                        }
+
+
+
+
+
+
+                        Thread.sleep(delay);
+
+
+
+
+
+
+
+                        switch(step.action){
+
+
 
                             case "OPEN_APP":
 
-                                service.openApp(step.text);
+
+
+                                service.openApp(
+                                        step.text
+                                );
+
+
                                 break;
+
+
+
+
+
+
 
                             case "CLICK":
 
+
+
                                 service.performTap(
+
                                         step.x,
+
                                         step.y
+
                                 );
+
+
                                 break;
+
+
+
+
+
+
+
 
                             case "TEXT":
 
-                                service.typeText(step.text);
+
+
+                                service.typeText(
+
+                                        step.text
+
+                                );
+
+
                                 break;
+
+
+
                         }
 
-                    } catch (Exception e) {
-                        e.printStackTrace();
+
+
+
+
                     }
+
+
+
                 }
+
+
+
+
+            }catch(Exception e){
+
+
+                e.printStackTrace();
+
+
+
+            }finally{
+
+
+                running = false;
+
+
             }
 
-            running = false;
 
-        }).start();
+
+
+        });
+
+
+
+
+        replayThread.start();
+
+
+
     }
 
-    public void stop() {
+
+
+
+
+
+
+
+
+    public void stop(){
+
+
+
         running = false;
+
+
+
+        if(replayThread != null){
+
+
+            replayThread.interrupt();
+
+
+            replayThread = null;
+
+
+        }
+
+
+
     }
+
+
+
+
+
+
+    public boolean isRunning(){
+
+
+        return running;
+
+
+    }
+
+
+
 }
