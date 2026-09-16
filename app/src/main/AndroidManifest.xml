@@ -1,55 +1,109 @@
-<application
+<?xml version="1.0" encoding="utf-8"?>
 
-    android:label="Record Repeat Bot"
-    android:icon="@drawable/robot_repeat_automation_icon"
-    android:theme="@android:style/Theme.Material.Light.NoActionBar">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
 
-    <activity
-        android:name=".MainActivity"
-        android:exported="true">
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
 
-        <intent-filter>
 
-            <action android:name="android.intent.action.MAIN"/>
+    <application
 
-            <category android:name="android.intent.category.LAUNCHER"/>
+        android:allowBackup="true"
 
-        </intent-filter>
+        android:label="Record Repeat Bot"
 
-    </activity>
+        android:supportsRtl="true"
+
+        android:theme="@android:style/Theme.Material.Light.NoActionBar">
 
 
 
-    <activity
-        android:name=".SmartBuilderActivity"
-        android:exported="false"/>
+        <activity
+
+            android:name=".MainActivity"
+
+            android:exported="true">
+
+
+            <intent-filter>
+
+
+                <action android:name="android.intent.action.MAIN"/>
+
+
+                <category android:name="android.intent.category.LAUNCHER"/>
+
+
+            </intent-filter>
+
+
+        </activity>
 
 
 
-    <service
-        android:name=".TouchRecorderService"
-        android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
-        android:exported="true">
-
-        <intent-filter>
-
-            <action android:name="android.accessibilityservice.AccessibilityService"/>
-
-        </intent-filter>
 
 
-        <meta-data
-            android:name="android.accessibilityservice"
-            android:resource="@xml/accessibility_service_config"/>
+        <!-- Smart Builder Screen -->
 
-    </service>
+        <activity
+
+            android:name=".SmartBuilderActivity"
+
+            android:exported="false"/>
 
 
 
-    <service
-        android:name=".FloatingControlService"
-        android:exported="false"/>
 
 
-</application>
+
+
+        <!-- Accessibility Recorder -->
+
+        <service
+
+            android:name=".TouchRecorderService"
+
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
+
+            android:exported="true">
+
+
+            <intent-filter>
+
+
+                <action android:name="android.accessibilityservice.AccessibilityService"/>
+
+
+            </intent-filter>
+
+
+
+            <meta-data
+
+                android:name="android.accessibilityservice"
+
+                android:resource="@xml/accessibility_service_config"/>
+
+
+        </service>
+
+
+
+
+
+
+
+        <!-- Floating Button -->
+
+        <service
+
+            android:name=".FloatingControlService"
+
+            android:exported="false"/>
+
+
+
+    </application>
+
+
+</manifest>
