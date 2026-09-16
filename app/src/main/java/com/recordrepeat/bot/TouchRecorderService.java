@@ -20,6 +20,7 @@ import android.widget.Toast;
 public class TouchRecorderService extends AccessibilityService {
 
     private static TouchRecorderService instance;
+    private boolean connected = false;
 
     private final Handler handler =
             new Handler(Looper.getMainLooper());
