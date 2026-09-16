@@ -22,11 +22,13 @@ public class MainActivity extends Activity {
 
     ListView workflowList;
 
+
     ArrayList<String> names =
             new ArrayList<>();
 
 
     RecordManager recordManager;
+
 
     String selectedWorkflow = "";
 
@@ -41,11 +43,14 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState){
 
+
         super.onCreate(savedInstanceState);
+
 
 
         recordManager =
                 RecordManager.getInstance();
+
 
 
 
@@ -67,6 +72,7 @@ public class MainActivity extends Activity {
         workflowName =
                 new EditText(this);
 
+
         workflowName.setHint(
                 "Workflow Name"
         );
@@ -76,16 +82,20 @@ public class MainActivity extends Activity {
         repeatInput =
                 new EditText(this);
 
+
         repeatInput.setHint(
                 "Repeat Count"
         );
+
 
         repeatInput.setInputType(2);
 
 
 
+
         Button record =
                 new Button(this);
+
 
         record.setText(
                 "START RECORD"
@@ -93,8 +103,10 @@ public class MainActivity extends Activity {
 
 
 
+
         Button save =
                 new Button(this);
+
 
         save.setText(
                 "SAVE WORKFLOW"
@@ -102,8 +114,10 @@ public class MainActivity extends Activity {
 
 
 
+
         Button run =
                 new Button(this);
+
 
         run.setText(
                 "RUN SELECTED"
@@ -111,31 +125,42 @@ public class MainActivity extends Activity {
 
 
 
+
         Button stop =
                 new Button(this);
+
 
         stop.setText(
                 "STOP REPEAT"
         );
-        Button delete =
-        new Button(this);
 
-delete.setText(
-        "DELETE WORKFLOW"
-);
+
+
+
+        Button delete =
+                new Button(this);
+
+
+        delete.setText(
+                "DELETE WORKFLOW"
+        );
+
 
 
 
         floatingButton =
                 new Button(this);
 
+
         floatingButton.setText(
                 "START FLOATING BOT"
         );
 
 
+
         workflowList =
                 new ListView(this);
+
 
 
         loadWorkflows();
@@ -144,7 +169,9 @@ delete.setText(
 
         record.setOnClickListener(v -> {
 
+
             recordManager.startRecording();
+
 
 
             Toast.makeText(
@@ -153,17 +180,22 @@ delete.setText(
                     Toast.LENGTH_SHORT
             ).show();
 
+
+
         });
+
 
 
 
         save.setOnClickListener(v -> {
 
 
+
             String name =
                     workflowName
                     .getText()
                     .toString();
+
 
 
             if(name.isEmpty()){
@@ -173,6 +205,8 @@ delete.setText(
             }
 
 
+
+
             WorkflowStorage.saveWorkflow(
                     this,
                     name,
@@ -180,7 +214,9 @@ delete.setText(
             );
 
 
+
             loadWorkflows();
+
 
 
             Toast.makeText(
@@ -190,7 +226,9 @@ delete.setText(
             ).show();
 
 
+
         });
+
 
 
 
@@ -202,15 +240,18 @@ delete.setText(
                             names.get(position);
 
 
+
                     Toast.makeText(
                             this,
-                            selectedWorkflow + " selected",
+                            selectedWorkflow+" selected",
                             Toast.LENGTH_SHORT
                     ).show();
 
 
+
                 });
-                run.setOnClickListener(v -> {
+
+        run.setOnClickListener(v -> {
 
 
             if(selectedWorkflow.isEmpty()){
@@ -250,11 +291,12 @@ delete.setText(
 
 
 
-
             int count = 1;
 
 
+
             try{
+
 
                 count =
                 Integer.parseInt(
@@ -294,7 +336,6 @@ delete.setText(
 
 
 
-
             autoRepeatEngine =
                     new AutoRepeatEngine(
                             service
@@ -316,6 +357,7 @@ delete.setText(
             ).show();
 
 
+
         });
 
 
@@ -324,6 +366,7 @@ delete.setText(
 
 
         stop.setOnClickListener(v -> {
+
 
 
             if(autoRepeatEngine != null){
@@ -343,6 +386,59 @@ delete.setText(
             ).show();
 
 
+
+        });
+
+
+
+
+
+
+
+        delete.setOnClickListener(v -> {
+
+
+
+            if(selectedWorkflow.isEmpty()){
+
+
+                Toast.makeText(
+                        this,
+                        "Select workflow first",
+                        Toast.LENGTH_SHORT
+                ).show();
+
+
+                return;
+
+            }
+
+
+
+
+            WorkflowStorage.deleteWorkflow(
+                    this,
+                    selectedWorkflow
+            );
+
+
+
+            selectedWorkflow = "";
+
+
+
+            loadWorkflows();
+
+
+
+            Toast.makeText(
+                    this,
+                    "Workflow Deleted",
+                    Toast.LENGTH_SHORT
+            ).show();
+
+
+
         });
 
 
@@ -352,6 +448,7 @@ delete.setText(
 
 
         floatingButton.setOnClickListener(v -> {
+
 
 
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
@@ -384,6 +481,7 @@ delete.setText(
                         );
 
 
+
                 startService(intent);
 
 
@@ -398,8 +496,8 @@ delete.setText(
             }
 
 
-
         });
+
 
 
 
@@ -420,11 +518,14 @@ delete.setText(
 
         layout.addView(stop);
 
+        layout.addView(delete);
+
         layout.addView(floatingButton);
 
 
 
         setContentView(layout);
+
 
 
     }
@@ -472,6 +573,7 @@ delete.setText(
 
 
 
+
         workflowList.setAdapter(
                 new ArrayAdapter<>(
                         this,
@@ -483,6 +585,7 @@ delete.setText(
 
 
     }
+
 
 
 }
