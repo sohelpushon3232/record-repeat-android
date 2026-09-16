@@ -1,5 +1,6 @@
 package com.recordrepeat.bot;
 
+
 import android.app.Activity;
 import android.os.Bundle;
 import android.widget.*;
@@ -8,7 +9,9 @@ import android.provider.Settings;
 import android.net.Uri;
 import android.os.Build;
 
+
 import org.json.JSONArray;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,26 +21,33 @@ import java.util.List;
 public class MainActivity extends Activity {
 
 
+
     EditText workflowName;
     EditText repeatInput;
+
 
 
     ListView workflowList;
     ListView smartWorkflowList;
 
 
+
     ArrayList<String> names =
             new ArrayList<>();
+
+
     ArrayList<String> smartNames =
-        new ArrayList<>();
+            new ArrayList<>();
 
-String selectedSmartWorkflow = "";
-
-
-    RecordManager recordManager;
 
 
     String selectedWorkflow = "";
+
+    String selectedSmartWorkflow = "";
+
+
+
+    RecordManager recordManager;
 
 
     AutoRepeatEngine autoRepeatEngine;
@@ -68,6 +78,7 @@ String selectedSmartWorkflow = "";
 
 
 
+
         LinearLayout layout =
                 new LinearLayout(this);
 
@@ -80,7 +91,10 @@ String selectedSmartWorkflow = "";
 
 
         layout.setPadding(
-                30,30,30,30
+                30,
+                30,
+                30,
+                30
         );
 
 
@@ -94,6 +108,7 @@ String selectedSmartWorkflow = "";
         workflowName.setHint(
                 "Workflow Name"
         );
+
 
 
 
@@ -115,6 +130,8 @@ String selectedSmartWorkflow = "";
 
 
 
+
+
         Button record =
                 new Button(this);
 
@@ -122,6 +139,7 @@ String selectedSmartWorkflow = "";
         record.setText(
                 "START RECORD"
         );
+
 
 
 
@@ -139,13 +157,16 @@ String selectedSmartWorkflow = "";
 
 
 
+
         Button run =
                 new Button(this);
 
 
         run.setText(
-                "RUN SELECTED"
+                "RUN RECORD WORKFLOW"
         );
+
+
 
 
 
@@ -163,6 +184,7 @@ String selectedSmartWorkflow = "";
 
 
 
+
         Button delete =
                 new Button(this);
 
@@ -170,6 +192,9 @@ String selectedSmartWorkflow = "";
         delete.setText(
                 "DELETE WORKFLOW"
         );
+
+
+
 
 
 
@@ -187,6 +212,9 @@ String selectedSmartWorkflow = "";
 
 
 
+
+
+
         smartBuilderButton =
                 new Button(this);
 
@@ -194,6 +222,9 @@ String selectedSmartWorkflow = "";
         smartBuilderButton.setText(
                 "SMART BUILDER"
         );
+
+
+
 
 
 
@@ -211,18 +242,26 @@ String selectedSmartWorkflow = "";
 
 
 
+
+
+
         workflowList =
                 new ListView(this);
+
+
+
         smartWorkflowList =
-        new ListView(this);
+                new ListView(this);
 
 
-loadSmartWorkflows();
 
 
 
         loadWorkflows();
-                record.setOnClickListener(v -> {
+
+
+        loadSmartWorkflows();
+        record.setOnClickListener(v -> {
 
 
             recordManager.startRecording();
@@ -236,6 +275,7 @@ loadSmartWorkflows();
 
 
         });
+
 
 
 
@@ -304,23 +344,31 @@ loadSmartWorkflows();
 
 
                 });
+
+
+
+
+
+
+
         smartWorkflowList.setOnItemClickListener(
-        (parent, view, position, id) -> {
+                (parent, view, position, id) -> {
 
 
-    selectedSmartWorkflow =
-            smartNames.get(position);
+                    selectedSmartWorkflow =
+                            smartNames.get(position);
 
 
 
-    Toast.makeText(
-            this,
-            selectedSmartWorkflow+" selected",
-            Toast.LENGTH_SHORT
-    ).show();
+                    Toast.makeText(
+                            this,
+                            selectedSmartWorkflow+" selected",
+                            Toast.LENGTH_SHORT
+                    ).show();
 
 
-});
+                });
+
 
 
 
@@ -331,12 +379,13 @@ loadSmartWorkflows();
         run.setOnClickListener(v -> {
 
 
-            if(selectedSmartWorkflow.isEmpty()){
+
+            if(selectedWorkflow.isEmpty()){
 
 
                 Toast.makeText(
                         this,
-                        "Select workflow first",
+                        "Select Record Workflow",
                         Toast.LENGTH_SHORT
                 ).show();
 
@@ -348,8 +397,10 @@ loadSmartWorkflows();
 
 
 
+
             TouchRecorderService service =
                     TouchRecorderService.getInstance();
+
 
 
 
@@ -371,7 +422,10 @@ loadSmartWorkflows();
 
 
 
+
+
             List<ActionStep> steps =
+
                     WorkflowStorage.loadWorkflow(
                             this,
                             selectedWorkflow
@@ -380,10 +434,15 @@ loadSmartWorkflows();
 
 
 
+
+
             autoRepeatEngine =
+
                     new AutoRepeatEngine(
                             service
                     );
+
+
 
 
 
@@ -391,6 +450,7 @@ loadSmartWorkflows();
                     steps,
                     1
             );
+
 
 
 
@@ -414,7 +474,16 @@ loadSmartWorkflows();
             }
 
 
+            Toast.makeText(
+                    this,
+                    "Stopped",
+                    Toast.LENGTH_SHORT
+            ).show();
+
+
+
         });
+
 
 
 
@@ -434,6 +503,7 @@ loadSmartWorkflows();
 
 
 
+
             WorkflowStorage.deleteWorkflow(
                     this,
                     selectedWorkflow
@@ -444,51 +514,8 @@ loadSmartWorkflows();
             selectedWorkflow = "";
 
 
+
             loadWorkflows();
-            private void loadSmartWorkflows(){
-
-
-    smartNames.clear();
-
-
-    JSONArray array =
-            SmartWorkflowStorage.getWorkflows(this);
-
-
-
-    for(int i=0;i<array.length();i++){
-
-
-        try{
-
-
-            smartNames.add(
-                    array.getJSONObject(i)
-                    .getString("name")
-            );
-
-
-        }catch(Exception ignored){}
-
-
-    }
-
-
-
-
-
-    smartWorkflowList.setAdapter(
-
-            new ArrayAdapter<>(
-                    this,
-                    android.R.layout.simple_list_item_1,
-                    smartNames
-            )
-
-    );
-
-
-}
 
 
 
@@ -506,7 +533,8 @@ loadSmartWorkflows();
 
 
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
-                    && !Settings.canDrawOverlays(this)){
+                    &&
+                    !Settings.canDrawOverlays(this)){
 
 
 
@@ -514,8 +542,7 @@ loadSmartWorkflows();
                         new Intent(
                                 Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
                                 Uri.parse(
-                                        "package:"+
-                                        getPackageName()
+                                        "package:"+getPackageName()
                                 )
                         );
 
@@ -529,10 +556,12 @@ loadSmartWorkflows();
 
 
                 startService(
+
                         new Intent(
                                 this,
                                 FloatingControlService.class
                         )
+
                 );
 
 
@@ -551,15 +580,14 @@ loadSmartWorkflows();
         smartBuilderButton.setOnClickListener(v -> {
 
 
-            Intent intent =
+            startActivity(
+
                     new Intent(
                             this,
                             SmartBuilderActivity.class
-                    );
+                    )
 
-
-            startActivity(intent);
-
+            );
 
 
         });
@@ -575,7 +603,7 @@ loadSmartWorkflows();
 
 
 
-            if(selectedWorkflow.isEmpty()){
+            if(selectedSmartWorkflow.isEmpty()){
 
 
                 Toast.makeText(
@@ -592,13 +620,17 @@ loadSmartWorkflows();
 
 
 
+
             TouchRecorderService service =
+
                     TouchRecorderService.getInstance();
 
 
 
 
+
             SmartRunEngine engine =
+
                     new SmartRunEngine(
                             this,
                             service
@@ -607,9 +639,9 @@ loadSmartWorkflows();
 
 
 
+
             engine.runWorkflow(
-        selectedSmartWorkflow
-);
+                    selectedSmartWorkflow
             );
 
 
@@ -623,19 +655,21 @@ loadSmartWorkflows();
 
 
 
-
         layout.addView(workflowName);
 
         layout.addView(repeatInput);
+
+        layout.addView(workflowList);
+
+        layout.addView(smartWorkflowList);
 
         layout.addView(record);
 
         layout.addView(save);
 
-        layout.addView(workflowList);
-        layout.addView(smartWorkflowList);
-
         layout.addView(run);
+
+        layout.addView(smartRunButton);
 
         layout.addView(stop);
 
@@ -645,7 +679,6 @@ loadSmartWorkflows();
 
         layout.addView(smartBuilderButton);
 
-        layout.addView(smartRunButton);
 
 
 
@@ -662,7 +695,9 @@ loadSmartWorkflows();
 
 
 
+
     private void loadWorkflows(){
+
 
 
         names.clear();
@@ -670,7 +705,9 @@ loadSmartWorkflows();
 
 
         JSONArray array =
+
                 WorkflowStorage.getWorkflows(this);
+
 
 
 
@@ -682,8 +719,10 @@ loadSmartWorkflows();
 
 
                 names.add(
+
                         array.getJSONObject(i)
                         .getString("name")
+
                 );
 
 
@@ -699,14 +738,90 @@ loadSmartWorkflows();
 
 
         workflowList.setAdapter(
+
                 new ArrayAdapter<>(
+
                         this,
+
                         android.R.layout.simple_list_item_1,
+
                         names
+
                 )
+
         );
 
 
     }
 
 
+
+
+
+
+
+
+    private void loadSmartWorkflows(){
+
+
+
+        smartNames.clear();
+
+
+
+        JSONArray array =
+
+                SmartWorkflowStorage.getWorkflows(this);
+
+
+
+
+
+
+        for(int i=0;i<array.length();i++){
+
+
+            try{
+
+
+                smartNames.add(
+
+                        array.getJSONObject(i)
+                        .getString("name")
+
+                );
+
+
+            }catch(Exception ignored){}
+
+
+
+        }
+
+
+
+
+
+
+
+        smartWorkflowList.setAdapter(
+
+                new ArrayAdapter<>(
+
+                        this,
+
+                        android.R.layout.simple_list_item_1,
+
+                        smartNames
+
+                )
+
+        );
+
+
+
+    }
+
+
+
+}
