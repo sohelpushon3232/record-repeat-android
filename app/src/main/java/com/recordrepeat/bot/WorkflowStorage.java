@@ -235,4 +235,81 @@ public static List<ActionStep> loadWorkflow(
     return steps;
 
 }
+public static void deleteWorkflow(
+        Context context,
+        String workflowName
+){
+
+    try{
+
+
+        SharedPreferences pref =
+                context.getSharedPreferences(
+                        PREF,
+                        Context.MODE_PRIVATE
+                );
+
+
+        JSONArray workflows =
+                new JSONArray(
+                        pref.getString(
+                                KEY,
+                                "[]"
+                        )
+                );
+
+
+
+        JSONArray newWorkflows =
+                new JSONArray();
+
+
+
+        for(int i = 0;
+            i < workflows.length();
+            i++){
+
+
+
+            JSONObject workflow =
+                    workflows.getJSONObject(i);
+
+
+
+            if(!workflow
+                    .getString("name")
+                    .equals(workflowName)){
+
+
+                newWorkflows.put(
+                        workflow
+                );
+
+
+            }
+
+
+        }
+
+
+
+        pref.edit()
+                .putString(
+                        KEY,
+                        newWorkflows.toString()
+                )
+                .apply();
+
+
+
+    }catch(Exception e){
+
+
+        e.printStackTrace();
+
+
+    }
+
+
+}
 }
