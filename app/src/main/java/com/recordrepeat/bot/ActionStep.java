@@ -6,18 +6,15 @@ import org.json.JSONObject;
 
 public class ActionStep {
 
+public String type;
 
-    private String type;
+public int x;
 
-    private int x;
+public int y;
 
-    private int y;
+public String value;
 
-    private String value;
-
-    private long delay;
-
-
+public long delay;
 
     public ActionStep(
             String type,
