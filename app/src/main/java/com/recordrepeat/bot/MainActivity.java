@@ -21,15 +21,12 @@ import java.util.List;
 public class MainActivity extends Activity {
 
 
-
     EditText workflowName;
     EditText repeatInput;
 
 
-
     ListView workflowList;
     ListView smartWorkflowList;
-
 
 
     ArrayList<String> names =
@@ -55,10 +52,12 @@ public class MainActivity extends Activity {
 
 
     Button floatingButton;
-
     Button smartBuilderButton;
-
     Button smartRunButton;
+
+
+
+    boolean isRecording = false;
 
 
 
@@ -78,7 +77,6 @@ public class MainActivity extends Activity {
 
 
 
-
         LinearLayout layout =
                 new LinearLayout(this);
 
@@ -89,14 +87,9 @@ public class MainActivity extends Activity {
         );
 
 
-
         layout.setPadding(
-                30,
-                30,
-                30,
-                30
+                30,30,30,30
         );
-
 
 
 
@@ -108,7 +101,6 @@ public class MainActivity extends Activity {
         workflowName.setHint(
                 "Workflow Name"
         );
-
 
 
 
@@ -129,9 +121,6 @@ public class MainActivity extends Activity {
 
 
 
-
-
-
         Button record =
                 new Button(this);
 
@@ -139,7 +128,6 @@ public class MainActivity extends Activity {
         record.setText(
                 "START RECORD"
         );
-
 
 
 
@@ -157,7 +145,6 @@ public class MainActivity extends Activity {
 
 
 
-
         Button run =
                 new Button(this);
 
@@ -165,8 +152,6 @@ public class MainActivity extends Activity {
         run.setText(
                 "RUN RECORD WORKFLOW"
         );
-
-
 
 
 
@@ -184,7 +169,6 @@ public class MainActivity extends Activity {
 
 
 
-
         Button delete =
                 new Button(this);
 
@@ -192,9 +176,6 @@ public class MainActivity extends Activity {
         delete.setText(
                 "DELETE WORKFLOW"
         );
-
-
-
 
 
 
@@ -212,9 +193,6 @@ public class MainActivity extends Activity {
 
 
 
-
-
-
         smartBuilderButton =
                 new Button(this);
 
@@ -222,9 +200,6 @@ public class MainActivity extends Activity {
         smartBuilderButton.setText(
                 "SMART BUILDER"
         );
-
-
-
 
 
 
@@ -242,9 +217,6 @@ public class MainActivity extends Activity {
 
 
 
-
-
-
         workflowList =
                 new ListView(this);
 
@@ -256,26 +228,72 @@ public class MainActivity extends Activity {
 
 
 
-
         loadWorkflows();
 
-
         loadSmartWorkflows();
+
+
+
+
+
         record.setOnClickListener(v -> {
 
 
-            recordManager.startRecording();
+
+            if(!isRecording){
 
 
-            Toast.makeText(
-                    this,
-                    "Recording Started",
-                    Toast.LENGTH_SHORT
-            ).show();
+
+                recordManager.clearSteps();
+
+                recordManager.startRecording();
+
+
+                isRecording = true;
+
+
+                record.setText(
+                        "STOP RECORD"
+                );
+
+
+
+                Toast.makeText(
+                        this,
+                        "Recording Started",
+                        Toast.LENGTH_SHORT
+                ).show();
+
+
+
+            }else{
+
+
+                recordManager.stopRecording();
+
+
+                isRecording = false;
+
+
+                record.setText(
+                        "START RECORD"
+                );
+
+
+
+                Toast.makeText(
+                        this,
+                        "Recording Stopped",
+                        Toast.LENGTH_SHORT
+                ).show();
+
+
+
+            }
+
 
 
         });
-
 
 
 
@@ -299,13 +317,15 @@ public class MainActivity extends Activity {
 
 
 
-
             WorkflowStorage.saveWorkflow(
                     this,
                     name,
                     recordManager.getSteps()
             );
 
+
+
+            recordManager.clearSteps();
 
 
             loadWorkflows();
@@ -319,16 +339,15 @@ public class MainActivity extends Activity {
             ).show();
 
 
+
         });
 
 
 
 
 
-
-
         workflowList.setOnItemClickListener(
-                (parent, view, position, id) -> {
+                (parent,view,position,id)->{
 
 
                     selectedWorkflow =
@@ -343,16 +362,12 @@ public class MainActivity extends Activity {
                     ).show();
 
 
+
                 });
 
 
-
-
-
-
-
         smartWorkflowList.setOnItemClickListener(
-                (parent, view, position, id) -> {
+                (parent,view,position,id)->{
 
 
                     selectedSmartWorkflow =
@@ -367,8 +382,8 @@ public class MainActivity extends Activity {
                     ).show();
 
 
-                });
 
+                });
 
 
 
@@ -398,36 +413,38 @@ public class MainActivity extends Activity {
 
 
 
+
             TouchRecorderService service =
                     TouchRecorderService.getInstance();
 
 
 
 
-if(service == null){
+
+            if(service == null){
 
 
-    Toast.makeText(
-            this,
-            "Accessibility reconnecting...",
-            Toast.LENGTH_LONG
-    ).show();
+
+                Toast.makeText(
+                        this,
+                        "Enable Accessibility First",
+                        Toast.LENGTH_LONG
+                ).show();
 
 
-    Intent intent =
-            new Intent(
-                    Settings.ACTION_ACCESSIBILITY_SETTINGS
-            );
+
+                startActivity(
+                        new Intent(
+                                Settings.ACTION_ACCESSIBILITY_SETTINGS
+                        )
+                );
 
 
-    startActivity(intent);
+                return;
 
 
-    return;
+            }
 
-}
-
-            
 
 
 
@@ -446,6 +463,39 @@ if(service == null){
 
 
 
+            if(steps.isEmpty()){
+
+
+                Toast.makeText(
+                        this,
+                        "No steps found",
+                        Toast.LENGTH_SHORT
+                ).show();
+
+
+                return;
+
+
+            }
+
+
+
+
+
+
+
+            if(autoRepeatEngine != null){
+
+                autoRepeatEngine.stop();
+
+            }
+
+
+
+
+
+
+
             autoRepeatEngine =
 
                     new AutoRepeatEngine(
@@ -456,11 +506,47 @@ if(service == null){
 
 
 
+
+
+            int count = 1;
+
+
+
+            try{
+
+
+                count =
+                        Integer.parseInt(
+                                repeatInput
+                                .getText()
+                                .toString()
+                        );
+
+
+
+            }catch(Exception ignored){}
+
+
+
+
+
+
+
             autoRepeatEngine.start(
                     steps,
-                    1
+                    count
             );
 
+
+
+
+
+
+            Toast.makeText(
+                    this,
+                    "Automation Started",
+                    Toast.LENGTH_SHORT
+            ).show();
 
 
 
@@ -479,14 +565,18 @@ if(service == null){
 
             if(autoRepeatEngine != null){
 
+
                 autoRepeatEngine.stop();
+
 
             }
 
 
+
+
             Toast.makeText(
                     this,
-                    "Stopped",
+                    "Automation Stopped",
                     Toast.LENGTH_SHORT
             ).show();
 
@@ -507,9 +597,28 @@ if(service == null){
 
             if(selectedWorkflow.isEmpty()){
 
+                Toast.makeText(
+                        this,
+                        "Select Workflow First",
+                        Toast.LENGTH_SHORT
+                ).show();
+
+
                 return;
 
             }
+
+
+
+
+
+            if(autoRepeatEngine != null){
+
+                autoRepeatEngine.stop();
+
+            }
+
+
 
 
 
@@ -521,11 +630,23 @@ if(service == null){
 
 
 
+
+
             selectedWorkflow = "";
 
 
 
             loadWorkflows();
+
+
+
+
+
+            Toast.makeText(
+                    this,
+                    "Workflow Deleted",
+                    Toast.LENGTH_SHORT
+            ).show();
 
 
 
@@ -575,7 +696,9 @@ if(service == null){
                 );
 
 
+
             }
+
 
 
         });
@@ -588,6 +711,7 @@ if(service == null){
 
 
         smartBuilderButton.setOnClickListener(v -> {
+
 
 
             startActivity(
@@ -639,6 +763,27 @@ if(service == null){
 
 
 
+            if(service == null){
+
+
+                startActivity(
+
+                        new Intent(
+                                Settings.ACTION_ACCESSIBILITY_SETTINGS
+                        )
+
+                );
+
+
+                return;
+
+            }
+
+
+
+
+
+
             SmartRunEngine engine =
 
                     new SmartRunEngine(
@@ -650,13 +795,16 @@ if(service == null){
 
 
 
+
             engine.runWorkflow(
                     selectedSmartWorkflow
             );
 
 
 
+
         });
+
 
 
 
@@ -688,7 +836,6 @@ if(service == null){
         layout.addView(floatingButton);
 
         layout.addView(smartBuilderButton);
-
 
 
 
@@ -725,6 +872,7 @@ if(service == null){
         for(int i=0;i<array.length();i++){
 
 
+
             try{
 
 
@@ -734,6 +882,7 @@ if(service == null){
                         .getString("name")
 
                 );
+
 
 
             }catch(Exception ignored){}
@@ -760,6 +909,7 @@ if(service == null){
                 )
 
         );
+
 
 
     }
@@ -791,6 +941,7 @@ if(service == null){
         for(int i=0;i<array.length();i++){
 
 
+
             try{
 
 
@@ -807,7 +958,6 @@ if(service == null){
 
 
         }
-
 
 
 
