@@ -142,6 +142,65 @@ public class RecordManager {
 
 
 
+    public synchronized void replaceLastText(
+            ActionStep step
+    ){
+
+
+        if(!recording || step == null){
+
+            return;
+
+        }
+
+
+
+
+        if(!steps.isEmpty()){
+
+
+            ActionStep last =
+                    steps.get(
+                            steps.size()-1
+                    );
+
+
+
+            if("TEXT".equals(last.action)){
+
+
+
+                step.delay =
+                        last.delay;
+
+
+
+                steps.set(
+                        steps.size()-1,
+                        step
+                );
+
+
+                return;
+
+
+            }
+
+
+        }
+
+
+
+        addStep(step);
+
+
+    }
+
+
+
+
+
+
 
 
     public synchronized List<ActionStep> getSteps(){
