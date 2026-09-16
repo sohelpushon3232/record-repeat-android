@@ -1,15 +1,22 @@
 package com.recordrepeat.bot;
 
+
 import java.util.List;
+
 
 
 public class AutoRepeatEngine {
 
 
-    private boolean running = false;
+    private volatile boolean running = false;
 
 
     private TouchRecorderService service;
+
+
+    private Thread worker;
+
+
 
 
 
@@ -24,70 +31,160 @@ public class AutoRepeatEngine {
 
 
 
-    public void start(
+
+
+
+
+    public synchronized void start(
+
             List<ActionStep> steps,
+
             int repeatCount
+
     ){
+
+
+
+        stop();
+
+
+
+        if(service == null || steps == null){
+
+            return;
+
+        }
+
+
+
 
         running = true;
 
 
 
-        new Thread(() -> {
 
 
-            int current = 0;
+        worker = new Thread(() -> {
 
 
 
-            while(
-                    running &&
-                    (repeatCount == 0 ||
-                    current < repeatCount)
-            ){
+            try {
 
 
-                for(ActionStep step : steps){
+
+                int current = 0;
 
 
-                    if(!running){
-                        return;
-                    }
 
 
-                    try{
+
+                while(
+                        running &&
+                        (
+                        repeatCount == 0 ||
+                        current < repeatCount
+                        )
+                ){
 
 
-                        Thread.sleep(
-                                step.delay
-                        );
+
+                    for(ActionStep step : steps){
+
+
+
+                        if(!running){
+
+                            return;
+
+                        }
+
+
+
+
+
+
+                        long delay =
+                                step.delay;
+
+
+
+                        if(delay > 1500){
+
+                            delay = 800;
+
+                        }
+
+
+
+                        if(delay < 100){
+
+                            delay = 100;
+
+                        }
+
+
+
+
+
+                        Thread.sleep(delay);
+
+
+
 
 
                         execute(step);
 
 
 
-                    }catch(Exception e){
-
-                        e.printStackTrace();
-
                     }
+
+
+
+
+                    current++;
+
 
 
                 }
 
 
-                current++;
+
+
+
+            }catch(Exception e){
+
+
+                e.printStackTrace();
+
+
+
+            }finally{
+
+
+                running = false;
 
 
             }
 
 
 
-        }).start();
+
+
+        });
+
+
+
+
+        worker.start();
+
 
 
     }
+
+
+
+
+
 
 
 
@@ -97,37 +194,102 @@ public class AutoRepeatEngine {
     ){
 
 
+
+        if(service == null)
+            return;
+
+
+
+
+
         switch(step.action){
+
 
 
             case "CLICK":
 
+
+
                 service.performTap(
+
                         step.x,
+
                         step.y
+
                 );
 
+
                 break;
+
+
+
+
 
 
 
             case "TEXT":
 
+
+
                 service.typeText(
+
                         step.text
+
                 );
 
+
                 break;
+
+
+
+
 
 
 
             case "OPEN_APP":
 
+
+
                 service.openApp(
+
                         step.text
+
                 );
 
+
                 break;
+
+
+
+        }
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    public synchronized void stop(){
+
+
+
+        running = false;
+
+
+
+        if(worker != null){
+
+
+            worker.interrupt();
+
+
+            worker = null;
 
 
         }
@@ -139,11 +301,16 @@ public class AutoRepeatEngine {
 
 
 
-    public void stop(){
 
-        running = false;
+
+    public boolean isRunning(){
+
+
+        return running;
+
 
     }
+
 
 
 }
