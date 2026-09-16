@@ -38,17 +38,14 @@ public class MainActivity extends Activity {
 
 
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState){
 
         super.onCreate(savedInstanceState);
 
 
-
         recordManager =
                 RecordManager.getInstance();
-
 
 
 
@@ -67,10 +64,8 @@ public class MainActivity extends Activity {
 
 
 
-
         workflowName =
                 new EditText(this);
-
 
         workflowName.setHint(
                 "Workflow Name"
@@ -78,25 +73,19 @@ public class MainActivity extends Activity {
 
 
 
-
         repeatInput =
                 new EditText(this);
-
 
         repeatInput.setHint(
                 "Repeat Count"
         );
 
-
         repeatInput.setInputType(2);
-
-
 
 
 
         Button record =
                 new Button(this);
-
 
         record.setText(
                 "START RECORD"
@@ -104,10 +93,8 @@ public class MainActivity extends Activity {
 
 
 
-
         Button save =
                 new Button(this);
-
 
         save.setText(
                 "SAVE WORKFLOW"
@@ -115,10 +102,8 @@ public class MainActivity extends Activity {
 
 
 
-
         Button run =
                 new Button(this);
-
 
         run.setText(
                 "RUN SELECTED"
@@ -126,10 +111,8 @@ public class MainActivity extends Activity {
 
 
 
-
         Button stop =
                 new Button(this);
-
 
         stop.setText(
                 "STOP REPEAT"
@@ -137,33 +120,23 @@ public class MainActivity extends Activity {
 
 
 
-
         floatingButton =
                 new Button(this);
-
 
         floatingButton.setText(
                 "START FLOATING BOT"
         );
 
 
-
-
         workflowList =
                 new ListView(this);
-
-
 
 
         loadWorkflows();
 
 
 
-
-
-
         record.setOnClickListener(v -> {
-
 
             recordManager.startRecording();
 
@@ -174,23 +147,17 @@ public class MainActivity extends Activity {
                     Toast.LENGTH_SHORT
             ).show();
 
-
         });
-
-
-
 
 
 
         save.setOnClickListener(v -> {
 
 
-
             String name =
                     workflowName
                     .getText()
                     .toString();
-
 
 
             if(name.isEmpty()){
@@ -200,8 +167,6 @@ public class MainActivity extends Activity {
             }
 
 
-
-
             WorkflowStorage.saveWorkflow(
                     this,
                     name,
@@ -209,9 +174,7 @@ public class MainActivity extends Activity {
             );
 
 
-
             loadWorkflows();
-
 
 
             Toast.makeText(
@@ -221,13 +184,7 @@ public class MainActivity extends Activity {
             ).show();
 
 
-
         });
-
-
-
-
-
 
 
 
@@ -235,32 +192,19 @@ public class MainActivity extends Activity {
                 (parent, view, position, id) -> {
 
 
-
                     selectedWorkflow =
                             names.get(position);
 
 
-
-
                     Toast.makeText(
                             this,
-                            selectedWorkflow+" selected",
+                            selectedWorkflow + " selected",
                             Toast.LENGTH_SHORT
                     ).show();
 
 
-
                 });
-
-
-
-
-
-
-
-
-        run.setOnClickListener(v -> {
-
+                run.setOnClickListener(v -> {
 
 
             if(selectedWorkflow.isEmpty()){
@@ -279,18 +223,12 @@ public class MainActivity extends Activity {
 
 
 
-
-
-
             TouchRecorderService service =
                     TouchRecorderService.getInstance();
 
 
 
-
-
             if(service == null){
-
 
 
                 Toast.makeText(
@@ -307,15 +245,10 @@ public class MainActivity extends Activity {
 
 
 
-
-
-
             int count = 1;
 
 
-
             try{
-
 
                 count =
                 Integer.parseInt(
@@ -325,12 +258,7 @@ public class MainActivity extends Activity {
                 );
 
 
-
             }catch(Exception ignored){}
-
-
-
-
 
 
 
@@ -340,9 +268,6 @@ public class MainActivity extends Activity {
                             this,
                             selectedWorkflow
                     );
-
-
-
 
 
 
@@ -358,17 +283,7 @@ public class MainActivity extends Activity {
 
                 return;
 
-
             }
-
-
-
-
-
-
-            ReplayEngine replayEngine =
-                    new ReplayEngine(service);
-
 
 
 
@@ -376,10 +291,8 @@ public class MainActivity extends Activity {
 
             autoRepeatEngine =
                     new AutoRepeatEngine(
-                            replayEngine
+                            service
                     );
-
-
 
 
 
@@ -390,14 +303,11 @@ public class MainActivity extends Activity {
 
 
 
-
-
             Toast.makeText(
                     this,
                     "Auto Repeat Started",
                     Toast.LENGTH_SHORT
             ).show();
-
 
 
         });
@@ -407,16 +317,14 @@ public class MainActivity extends Activity {
 
 
 
-
-
-
         stop.setOnClickListener(v -> {
-
 
 
             if(autoRepeatEngine != null){
 
+
                 autoRepeatEngine.stop();
+
 
             }
 
@@ -429,7 +337,6 @@ public class MainActivity extends Activity {
             ).show();
 
 
-
         });
 
 
@@ -438,10 +345,7 @@ public class MainActivity extends Activity {
 
 
 
-
-
         floatingButton.setOnClickListener(v -> {
-
 
 
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
@@ -474,7 +378,6 @@ public class MainActivity extends Activity {
                         );
 
 
-
                 startService(intent);
 
 
@@ -491,9 +394,6 @@ public class MainActivity extends Activity {
 
 
         });
-
-
-
 
 
 
@@ -518,9 +418,7 @@ public class MainActivity extends Activity {
 
 
 
-
         setContentView(layout);
-
 
 
     }
@@ -541,7 +439,6 @@ public class MainActivity extends Activity {
 
         JSONArray array =
                 WorkflowStorage.getWorkflows(this);
-
 
 
 
@@ -569,7 +466,6 @@ public class MainActivity extends Activity {
 
 
 
-
         workflowList.setAdapter(
                 new ArrayAdapter<>(
                         this,
@@ -581,7 +477,6 @@ public class MainActivity extends Activity {
 
 
     }
-
 
 
 }
