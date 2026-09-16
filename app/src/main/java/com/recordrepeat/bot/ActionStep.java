@@ -1,36 +1,39 @@
 package com.recordrepeat.bot;
 
-
 import org.json.JSONObject;
 
 
 public class ActionStep {
 
-public String type;
 
-public int x;
+    // পুরোনো Record / Replay system
+    public String action;
 
-public int y;
+    public int x;
 
-public String value;
+    public int y;
 
-public long delay;
+    public String text;
+
+    public long delay;
+
+
 
     public ActionStep(
-            String type,
+            String action,
             int x,
             int y,
-            String value,
+            String text,
             long delay
     ){
 
-        this.type = type;
+        this.action = action;
 
         this.x = x;
 
         this.y = y;
 
-        this.value = value;
+        this.text = text;
 
         this.delay = delay;
 
@@ -38,14 +41,14 @@ public long delay;
 
 
 
-
+    // New-style getters
+    // Smart system compatibility এর জন্য রাখা হয়েছে
 
     public String getType(){
 
-        return type;
+        return action;
 
     }
-
 
 
     public int getX(){
@@ -55,7 +58,6 @@ public long delay;
     }
 
 
-
     public int getY(){
 
         return y;
@@ -63,13 +65,11 @@ public long delay;
     }
 
 
-
     public String getValue(){
 
-        return value;
+        return text;
 
     }
-
 
 
     public long getDelay(){
@@ -80,97 +80,150 @@ public long delay;
 
 
 
-
-
-
-
     public JSONObject toJSON(){
 
-
-        JSONObject obj =
+        JSONObject object =
                 new JSONObject();
-
 
         try{
 
-
-            obj.put(
-                    "type",
-                    type
+            // পুরোনো format
+            object.put(
+                    "action",
+                    action
             );
 
-
-            obj.put(
+            object.put(
                     "x",
                     x
             );
 
-
-            obj.put(
+            object.put(
                     "y",
                     y
             );
 
-
-            obj.put(
-                    "value",
-                    value
+            object.put(
+                    "text",
+                    text
             );
 
-
-            obj.put(
+            object.put(
                     "delay",
                     delay
             );
 
 
-        }catch(Exception ignored){}
+            // নতুন format compatibility
+            object.put(
+                    "type",
+                    action
+            );
+
+            object.put(
+                    "value",
+                    text
+            );
 
 
+        }catch(Exception e){
 
-        return obj;
+            e.printStackTrace();
 
+        }
+
+
+        return object;
 
     }
 
 
 
-
-
-
-
     public static ActionStep fromJSON(
-            JSONObject obj
+            JSONObject object
     ){
 
-
         try{
+
+            String actionValue;
+
+            String textValue;
+
+
+            // পুরোনো saved workflow হলে
+            if(object.has("action")){
+
+                actionValue =
+                        object.optString(
+                                "action",
+                                ""
+                        );
+
+            }else{
+
+                // নতুন format হলে
+                actionValue =
+                        object.optString(
+                                "type",
+                                ""
+                        );
+
+            }
+
+
+
+            if(object.has("text")){
+
+                textValue =
+                        object.optString(
+                                "text",
+                                ""
+                        );
+
+            }else{
+
+                textValue =
+                        object.optString(
+                                "value",
+                                ""
+                        );
+
+            }
+
 
 
             return new ActionStep(
 
-                    obj.getString("type"),
+                    actionValue,
 
-                    obj.getInt("x"),
+                    object.optInt(
+                            "x",
+                            0
+                    ),
 
-                    obj.getInt("y"),
+                    object.optInt(
+                            "y",
+                            0
+                    ),
 
-                    obj.getString("value"),
+                    textValue,
 
-                    obj.getLong("delay")
+                    object.optLong(
+                            "delay",
+                            500
+                    )
 
             );
 
 
         }catch(Exception e){
 
+            e.printStackTrace();
 
             return null;
 
         }
 
-
     }
-
 
 }
