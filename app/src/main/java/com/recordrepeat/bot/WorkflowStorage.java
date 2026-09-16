@@ -1,15 +1,21 @@
 package com.recordrepeat.bot;
 
+
 import android.content.Context;
 import android.content.SharedPreferences;
+
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+
 import java.util.ArrayList;
 import java.util.List;
 
+
+
 public class WorkflowStorage {
+
 
 
     private static final String PREF =
@@ -21,22 +27,40 @@ public class WorkflowStorage {
 
 
 
+
+
+
+
+
     public static void saveWorkflow(
+
             Context context,
+
             String name,
+
             List<ActionStep> steps
+
     ){
+
+
 
         try{
 
+
+
             SharedPreferences pref =
+
                     context.getSharedPreferences(
                             PREF,
                             Context.MODE_PRIVATE
                     );
 
 
-            JSONArray workflows =
+
+
+
+            JSONArray oldWorkflows =
+
                     new JSONArray(
                             pref.getString(
                                     KEY,
@@ -45,8 +69,58 @@ public class WorkflowStorage {
                     );
 
 
+
+
+
+
+            // Remove old workflow with same name
+
+            JSONArray workflows =
+                    new JSONArray();
+
+
+
+
+
+            for(int i=0;
+                i<oldWorkflows.length();
+                i++){
+
+
+
+                JSONObject old =
+
+                        oldWorkflows.getJSONObject(i);
+
+
+
+
+
+                if(!old.getString("name")
+                        .equals(name)){
+
+
+
+                    workflows.put(old);
+
+
+                }
+
+
+
+            }
+
+
+
+
+
+
+
             JSONObject workflow =
                     new JSONObject();
+
+
+
 
 
             workflow.put(
@@ -55,14 +129,29 @@ public class WorkflowStorage {
             );
 
 
+
+
+
+
+
             JSONArray actions =
                     new JSONArray();
 
 
+
+
+
+
+
             for(ActionStep step : steps){
+
+
 
                 JSONObject obj =
                         new JSONObject();
+
+
+
 
 
                 obj.put(
@@ -71,10 +160,12 @@ public class WorkflowStorage {
                 );
 
 
+
                 obj.put(
                         "x",
                         step.x
                 );
+
 
 
                 obj.put(
@@ -83,10 +174,12 @@ public class WorkflowStorage {
                 );
 
 
+
                 obj.put(
                         "text",
                         step.text
                 );
+
 
 
                 obj.put(
@@ -95,9 +188,17 @@ public class WorkflowStorage {
                 );
 
 
+
                 actions.put(obj);
 
+
+
             }
+
+
+
+
+
 
 
             workflow.put(
@@ -106,210 +207,378 @@ public class WorkflowStorage {
             );
 
 
-            workflows.put(workflow);
+
+
+
+
+            workflows.put(
+                    workflow
+            );
+
+
+
+
+
 
 
             pref.edit()
+
                     .putString(
                             KEY,
                             workflows.toString()
                     )
+
                     .apply();
+
+
+
+
 
 
         }catch(Exception e){
 
+
+
             e.printStackTrace();
+
+
 
         }
 
+
+
     }
+
+
+
+
+
+
 
 
 
     public static JSONArray getWorkflows(
+
             Context context
+
     ){
 
-        SharedPreferences pref =
-                context.getSharedPreferences(
-                        PREF,
-                        Context.MODE_PRIVATE
-                );
 
 
         try{
 
+
+
+            SharedPreferences pref =
+
+                    context.getSharedPreferences(
+                            PREF,
+                            Context.MODE_PRIVATE
+                    );
+
+
+
+
+
             return new JSONArray(
+
                     pref.getString(
                             KEY,
                             "[]"
                     )
+
             );
+
+
+
 
 
         }catch(Exception e){
 
+
+
             return new JSONArray();
+
+
 
         }
 
+
+
     }
 
-public static List<ActionStep> loadWorkflow(
-        Context context,
-        String workflowName
-){
-
-    ArrayList<ActionStep> steps =
-            new ArrayList<>();
-
-
-    JSONArray workflows =
-            getWorkflows(context);
-
-
-    try{
-
-
-        for(int i = 0; i < workflows.length(); i++){
-
-
-            JSONObject workflow =
-                    workflows.getJSONObject(i);
 
 
 
-            if(workflow
-                    .getString("name")
-                    .equals(workflowName)){
 
 
 
-                JSONArray actions =
-                        workflow.getJSONArray(
-                                "steps"
+
+
+    public static List<ActionStep> loadWorkflow(
+
+            Context context,
+
+            String workflowName
+
+    ){
+
+
+
+        ArrayList<ActionStep> steps =
+
+                new ArrayList<>();
+
+
+
+
+
+        try{
+
+
+
+            JSONArray workflows =
+
+                    getWorkflows(context);
+
+
+
+
+
+
+            for(int i=0;
+                i<workflows.length();
+                i++){
+
+
+
+                JSONObject workflow =
+
+                        workflows.getJSONObject(i);
+
+
+
+
+
+
+
+                if(workflow
+                        .getString("name")
+                        .equals(workflowName)){
+
+
+
+
+
+                    JSONArray actions =
+
+                            workflow.getJSONArray(
+                                    "steps"
+                            );
+
+
+
+
+
+
+
+                    for(int j=0;
+                        j<actions.length();
+                        j++){
+
+
+
+                        JSONObject obj =
+
+                                actions.getJSONObject(j);
+
+
+
+
+
+
+
+                        steps.add(
+
+                                new ActionStep(
+
+                                        obj.getString("action"),
+
+                                        obj.getInt("x"),
+
+                                        obj.getInt("y"),
+
+                                        obj.getString("text"),
+
+                                        obj.getLong("delay")
+
+                                )
+
                         );
 
 
 
-                for(int j = 0;
-                     j < actions.length();
-                     j++){
+                    }
 
 
 
-                    JSONObject obj =
-                            actions.getJSONObject(j);
+
+                    break;
 
 
-
-                    steps.add(
-                            new ActionStep(
-                                    obj.getString("action"),
-                                    obj.getInt("x"),
-                                    obj.getInt("y"),
-                                    obj.getString("text"),
-                                    obj.getLong("delay")
-                            )
-                    );
 
                 }
 
 
-                break;
-
-            }
-
-
-        }
-
-
-    }catch(Exception e){
-
-        e.printStackTrace();
-
-    }
-
-
-    return steps;
-
-}
-public static void deleteWorkflow(
-        Context context,
-        String workflowName
-){
-
-    try{
-
-
-        SharedPreferences pref =
-                context.getSharedPreferences(
-                        PREF,
-                        Context.MODE_PRIVATE
-                );
-
-
-        JSONArray workflows =
-                new JSONArray(
-                        pref.getString(
-                                KEY,
-                                "[]"
-                        )
-                );
-
-
-
-        JSONArray newWorkflows =
-                new JSONArray();
-
-
-
-        for(int i = 0;
-            i < workflows.length();
-            i++){
-
-
-
-            JSONObject workflow =
-                    workflows.getJSONObject(i);
-
-
-
-            if(!workflow
-                    .getString("name")
-                    .equals(workflowName)){
-
-
-                newWorkflows.put(
-                        workflow
-                );
 
 
             }
+
+
+
+
+
+        }catch(Exception e){
+
+
+
+            e.printStackTrace();
+
 
 
         }
 
 
 
-        pref.edit()
-                .putString(
-                        KEY,
-                        newWorkflows.toString()
-                )
-                .apply();
 
 
 
-    }catch(Exception e){
+        return steps;
 
-
-        e.printStackTrace();
 
 
     }
 
 
-}
+
+
+
+
+
+
+
+    public static void deleteWorkflow(
+
+            Context context,
+
+            String workflowName
+
+    ){
+
+
+
+        try{
+
+
+
+            SharedPreferences pref =
+
+                    context.getSharedPreferences(
+                            PREF,
+                            Context.MODE_PRIVATE
+                    );
+
+
+
+
+
+
+            JSONArray workflows =
+
+                    getWorkflows(context);
+
+
+
+
+
+
+            JSONArray newArray =
+
+                    new JSONArray();
+
+
+
+
+
+
+
+            for(int i=0;
+                i<workflows.length();
+                i++){
+
+
+
+                JSONObject workflow =
+
+                        workflows.getJSONObject(i);
+
+
+
+
+
+
+
+                if(!workflow
+                        .getString("name")
+                        .equals(workflowName)){
+
+
+
+                    newArray.put(workflow);
+
+
+
+                }
+
+
+
+            }
+
+
+
+
+
+
+
+
+            pref.edit()
+
+                    .putString(
+                            KEY,
+                            newArray.toString()
+                    )
+
+                    .apply();
+
+
+
+
+
+
+        }catch(Exception e){
+
+
+
+            e.printStackTrace();
+
+
+
+        }
+
+
+
+    }
+
+
+
 }
