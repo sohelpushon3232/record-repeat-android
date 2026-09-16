@@ -21,10 +21,8 @@ public class SmartWorkflowStorage {
             "smart_workflows";
 
 
-
     private static final String KEY =
             "workflows";
-
 
 
 
@@ -43,12 +41,44 @@ public class SmartWorkflowStorage {
     ){
 
 
-
         try{
 
 
-            JSONArray workflows =
+            JSONArray oldWorkflows =
                     getWorkflows(context);
+
+
+
+            JSONArray workflows =
+                    new JSONArray();
+
+
+
+
+
+            // Remove same name old workflow
+
+            for(int i=0;i<oldWorkflows.length();i++){
+
+
+                JSONObject old =
+                        oldWorkflows.getJSONObject(i);
+
+
+
+                if(!old.getString("name")
+                        .equals(name)){
+
+
+                    workflows.put(old);
+
+
+                }
+
+
+            }
+
+
 
 
 
@@ -76,8 +106,12 @@ public class SmartWorkflowStorage {
 
 
 
+
+
             JSONObject workflow =
                     new JSONObject();
+
+
 
 
 
@@ -85,6 +119,8 @@ public class SmartWorkflowStorage {
                     "name",
                     name
             );
+
+
 
 
 
@@ -97,10 +133,12 @@ public class SmartWorkflowStorage {
 
 
 
-
             workflows.put(
                     workflow
             );
+
+
+
 
 
 
@@ -118,6 +156,7 @@ public class SmartWorkflowStorage {
                             workflows.toString()
                     )
                     .apply();
+
 
 
 
@@ -149,7 +188,6 @@ public class SmartWorkflowStorage {
     ){
 
 
-
         try{
 
 
@@ -167,6 +205,7 @@ public class SmartWorkflowStorage {
 
 
 
+
             return new JSONArray(
                     data
             );
@@ -176,14 +215,10 @@ public class SmartWorkflowStorage {
         }catch(Exception e){
 
 
-            e.printStackTrace();
-
-
             return new JSONArray();
 
 
         }
-
 
 
     }
@@ -211,12 +246,15 @@ public class SmartWorkflowStorage {
 
 
 
-        try{
 
+
+        try{
 
 
             JSONArray workflows =
                     getWorkflows(context);
+
+
 
 
 
@@ -235,6 +273,7 @@ public class SmartWorkflowStorage {
 
 
 
+
                 if(workflow
                         .getString("name")
                         .equals(name)){
@@ -245,8 +284,7 @@ public class SmartWorkflowStorage {
 
                     JSONArray steps =
 
-                            workflow
-                            .getJSONArray(
+                            workflow.getJSONArray(
                                     "steps"
                             );
 
@@ -270,17 +308,21 @@ public class SmartWorkflowStorage {
 
 
 
+
+
                         if(command != null){
 
-                            list.add(
-                                    command
-                            );
+
+                            list.add(command);
+
 
                         }
 
 
 
                     }
+
+
 
 
 
@@ -295,8 +337,6 @@ public class SmartWorkflowStorage {
 
 
 
-
-
         }catch(Exception e){
 
 
@@ -308,10 +348,14 @@ public class SmartWorkflowStorage {
 
 
 
+
+
         return list;
 
 
     }
+
+
 
 
 
@@ -328,11 +372,13 @@ public class SmartWorkflowStorage {
     ){
 
 
+
         try{
 
 
             JSONArray workflows =
                     getWorkflows(context);
+
 
 
 
@@ -344,12 +390,17 @@ public class SmartWorkflowStorage {
 
 
 
+
+
             for(int i=0;i<workflows.length();i++){
 
 
 
                 JSONObject workflow =
+
                         workflows.getJSONObject(i);
+
+
 
 
 
@@ -360,6 +411,7 @@ public class SmartWorkflowStorage {
                         .equals(name)){
 
 
+
                     newArray.put(
                             workflow
                     );
@@ -368,7 +420,10 @@ public class SmartWorkflowStorage {
                 }
 
 
+
             }
+
+
 
 
 
@@ -402,6 +457,7 @@ public class SmartWorkflowStorage {
 
 
     }
+
 
 
 }
