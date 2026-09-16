@@ -8,27 +8,35 @@ import org.json.JSONObject;
 public class SmartCommand {
 
 
-    private String command;
+    private String type;
+
 
     private String value;
 
-    private long waitTime;
+
+    private long delay;
 
 
 
 
 
     public SmartCommand(
-            String command,
+
+            String type,
+
             String value,
-            long waitTime
+
+            long delay
+
     ){
 
-        this.command = command;
+
+        this.type = type;
 
         this.value = value;
 
-        this.waitTime = waitTime;
+        this.delay = delay;
+
 
     }
 
@@ -38,11 +46,14 @@ public class SmartCommand {
 
 
 
-    public String getCommand(){
+    public String getType(){
 
-        return command;
+
+        return type;
+
 
     }
+
 
 
 
@@ -51,21 +62,25 @@ public class SmartCommand {
 
     public String getValue(){
 
+
         return value;
 
-    }
-
-
-
-
-
-
-    public long getWaitTime(){
-
-        return waitTime;
 
     }
 
+
+
+
+
+
+
+    public long getDelay(){
+
+
+        return delay;
+
+
+    }
 
 
 
@@ -76,16 +91,18 @@ public class SmartCommand {
     public JSONObject toJSON(){
 
 
+
         JSONObject object =
                 new JSONObject();
+
 
 
         try{
 
 
             object.put(
-                    "command",
-                    command
+                    "type",
+                    type
             );
 
 
@@ -96,14 +113,16 @@ public class SmartCommand {
 
 
             object.put(
-                    "wait",
-                    waitTime
+                    "delay",
+                    delay
             );
 
 
 
         }catch(Exception e){
 
+
+            e.printStackTrace();
 
 
         }
@@ -114,7 +133,6 @@ public class SmartCommand {
 
 
     }
-
 
 
 
@@ -134,19 +152,26 @@ public class SmartCommand {
 
             return new SmartCommand(
 
-                    object.getString(
-                            "command"
+
+                    object.optString(
+                            "type",
+                            ""
                     ),
 
 
-                    object.getString(
-                            "value"
+
+                    object.optString(
+                            "value",
+                            ""
                     ),
 
 
-                    object.getLong(
-                            "wait"
+
+                    object.optLong(
+                            "delay",
+                            1000
                     )
+
 
             );
 
@@ -155,10 +180,13 @@ public class SmartCommand {
         }catch(Exception e){
 
 
+            e.printStackTrace();
+
+
             return null;
 
-        }
 
+        }
 
 
     }
