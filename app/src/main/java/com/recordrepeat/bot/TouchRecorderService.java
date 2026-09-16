@@ -4,22 +4,17 @@ package com.recordrepeat.bot;
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.GestureDescription;
 
-
 import android.content.Intent;
-
 
 import android.graphics.Path;
 import android.graphics.Rect;
-
 
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 
-
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
-
 
 import android.widget.Toast;
 
@@ -58,7 +53,6 @@ public class TouchRecorderService extends AccessibilityService {
 
 
 
-
     public static TouchRecorderService getInstance(){
 
         return instance;
@@ -75,7 +69,6 @@ public class TouchRecorderService extends AccessibilityService {
         return instance != null;
 
     }
-
 
 
 
@@ -101,7 +94,6 @@ public class TouchRecorderService extends AccessibilityService {
         ).show();
 
 
-
     }
 
 
@@ -118,13 +110,11 @@ public class TouchRecorderService extends AccessibilityService {
     ){
 
 
-
         if(event == null){
 
             return;
 
         }
-
 
 
 
@@ -152,8 +142,6 @@ public class TouchRecorderService extends AccessibilityService {
 
 
 
-
-
         if(event.getPackageName()!=null){
 
 
@@ -170,12 +158,7 @@ public class TouchRecorderService extends AccessibilityService {
 
 
 
-
-        // Ignore own app
-
-        if(packageName.equals(
-                getPackageName()
-        )){
+        if(packageName.equals(getPackageName())){
 
 
             return;
@@ -190,14 +173,12 @@ public class TouchRecorderService extends AccessibilityService {
 
 
 
-
         // APP OPEN RECORD
 
 
         if(event.getEventType()
                 ==
-                AccessibilityEvent
-                .TYPE_WINDOW_STATE_CHANGED){
+                AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED){
 
 
 
@@ -207,10 +188,7 @@ public class TouchRecorderService extends AccessibilityService {
 
 
 
-                lastPackage =
-                        packageName;
-
-
+                lastPackage = packageName;
 
 
 
@@ -232,12 +210,10 @@ public class TouchRecorderService extends AccessibilityService {
 
                 );
 
-
             }
 
 
         }
-
 
 
 
@@ -263,72 +239,12 @@ public class TouchRecorderService extends AccessibilityService {
 
 
 
-
-
-
         // CLICK RECORD
 
 
         if(event.getEventType()
                 ==
-                AccessibilityEvent.TYPE_VIEW_CLICKED
-                ||
-                event.getEventType()
-                ==
-                AccessibilityEvent.TYPE_VIEW_LONG_CLICKED){
-
-
-
-            AccessibilityNodeInfo clickNode =
-                    node;
-
-
-
-
-
-            while(clickNode != null
-                    &&
-                    !clickNode.isClickable()){
-
-
-                AccessibilityNodeInfo parent =
-                        clickNode.getParent();
-
-
-
-                if(parent == null){
-
-                    break;
-
-                }
-
-
-
-                clickNode = parent;
-
-
-
-            }
-
-
-
-
-
-
-
-            if(clickNode == null){
-
-
-                node.recycle();
-
-
-                return;
-
-
-            }
-
-
-
+                AccessibilityEvent.TYPE_VIEW_CLICKED){
 
 
 
@@ -337,12 +253,9 @@ public class TouchRecorderService extends AccessibilityService {
 
 
 
-
-            clickNode.getBoundsInScreen(
+            node.getBoundsInScreen(
                     rect
             );
-
-
 
 
 
@@ -364,9 +277,7 @@ public class TouchRecorderService extends AccessibilityService {
 
                 node.recycle();
 
-
                 return;
-
 
             }
 
@@ -382,19 +293,17 @@ public class TouchRecorderService extends AccessibilityService {
 
 
 
+
             if(x == lastX
                     &&
                     y == lastY
                     &&
-                    now - lastClickTime < 500){
-
+                    now-lastClickTime < 600){
 
 
                 node.recycle();
 
-
                 return;
-
 
             }
 
@@ -404,9 +313,7 @@ public class TouchRecorderService extends AccessibilityService {
 
             lastX = x;
 
-
             lastY = y;
-
 
             lastClickTime = now;
 
@@ -427,13 +334,11 @@ public class TouchRecorderService extends AccessibilityService {
 
                             "",
 
-                            300
+                            400
 
                     )
 
             );
-
-
 
 
         }
@@ -442,13 +347,7 @@ public class TouchRecorderService extends AccessibilityService {
 
         if(event.getEventType()
                 ==
-                AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED
-                ||
-                event.getEventType()
-                ==
-                AccessibilityEvent.TYPE_VIEW_FOCUSED){
-
-
+                AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED){
 
 
 
@@ -466,10 +365,8 @@ public class TouchRecorderService extends AccessibilityService {
                 if(text != null){
 
 
-
                     String value =
                             text.toString();
-
 
 
 
@@ -498,13 +395,10 @@ public class TouchRecorderService extends AccessibilityService {
                         );
 
 
-
                     }
 
 
-
                 }
-
 
 
             }
@@ -604,8 +498,6 @@ public class TouchRecorderService extends AccessibilityService {
 
 
 
-
-
         });
 
 
@@ -648,14 +540,15 @@ public class TouchRecorderService extends AccessibilityService {
 
 
 
+
             AccessibilityNodeInfo input =
 
                     root.findFocus(
 
-                            AccessibilityNodeInfo
-                            .FOCUS_INPUT
+                            AccessibilityNodeInfo.FOCUS_INPUT
 
                     );
+
 
 
 
@@ -684,6 +577,7 @@ public class TouchRecorderService extends AccessibilityService {
 
 
 
+
             args.putCharSequence(
 
                     AccessibilityNodeInfo
@@ -701,12 +595,12 @@ public class TouchRecorderService extends AccessibilityService {
 
             input.performAction(
 
-                    AccessibilityNodeInfo
-                    .ACTION_SET_TEXT,
+                    AccessibilityNodeInfo.ACTION_SET_TEXT,
 
                     args
 
             );
+
 
 
 
@@ -762,9 +656,7 @@ public class TouchRecorderService extends AccessibilityService {
 
 
                 intent.addFlags(
-
                         Intent.FLAG_ACTIVITY_NEW_TASK
-
                 );
 
 
@@ -818,6 +710,8 @@ public class TouchRecorderService extends AccessibilityService {
 
 
         }
+
+
 
 
 
