@@ -13,18 +13,21 @@ public class SmartBuilderActivity extends Activity {
 
 
 
-    Spinner commandSpinner;
+    EditText workflowName;
 
     EditText valueInput;
 
-    EditText workflowName;
+
+    Spinner commandSpinner;
 
 
     ListView stepList;
 
 
+
     ArrayList<SmartCommand> commands =
             new ArrayList<>();
+
 
 
     ArrayList<String> displaySteps =
@@ -39,13 +42,10 @@ public class SmartBuilderActivity extends Activity {
 
 
     @Override
-    protected void onCreate(
-            Bundle savedInstanceState
-    ){
+    protected void onCreate(Bundle savedInstanceState){
 
 
         super.onCreate(savedInstanceState);
-
 
 
 
@@ -53,14 +53,20 @@ public class SmartBuilderActivity extends Activity {
                 new LinearLayout(this);
 
 
+
         layout.setOrientation(
                 LinearLayout.VERTICAL
         );
 
 
+
         layout.setPadding(
-                30,30,30,30
+                30,
+                30,
+                30,
+                30
         );
+
 
 
 
@@ -79,12 +85,16 @@ public class SmartBuilderActivity extends Activity {
 
 
 
+
+
         commandSpinner =
                 new Spinner(this);
 
 
 
-        String[] commandTypes = {
+
+
+        String[] commandsList = {
 
 
                 "OPEN_APP",
@@ -100,12 +110,18 @@ public class SmartBuilderActivity extends Activity {
 
 
 
+
+
         ArrayAdapter<String> spinnerAdapter =
 
                 new ArrayAdapter<>(
+
                         this,
+
                         android.R.layout.simple_spinner_dropdown_item,
-                        commandTypes
+
+                        commandsList
+
                 );
 
 
@@ -125,8 +141,9 @@ public class SmartBuilderActivity extends Activity {
 
 
         valueInput.setHint(
-                "Value"
+                "Command Value"
         );
+
 
 
 
@@ -149,18 +166,24 @@ public class SmartBuilderActivity extends Activity {
 
 
 
-
         stepList =
                 new ListView(this);
+
+
+
 
 
 
         adapter =
 
                 new ArrayAdapter<>(
+
                         this,
+
                         android.R.layout.simple_list_item_1,
+
                         displaySteps
+
                 );
 
 
@@ -181,8 +204,10 @@ public class SmartBuilderActivity extends Activity {
 
 
         save.setText(
-                "SAVE WORKFLOW"
+                "SAVE SMART WORKFLOW"
         );
+
+
 
 
 
@@ -194,11 +219,12 @@ public class SmartBuilderActivity extends Activity {
 
 
 
-            String command =
+            String type =
 
                     commandSpinner
                     .getSelectedItem()
                     .toString();
+
 
 
 
@@ -213,25 +239,37 @@ public class SmartBuilderActivity extends Activity {
 
 
 
-            SmartCommand step =
+
+            SmartCommand command =
 
                     new SmartCommand(
-                            command,
+
+                            type,
+
                             value,
+
                             1000
+
                     );
 
 
 
+
+
+
             commands.add(
-                    step
+                    command
             );
+
+
+
+
 
 
 
             displaySteps.add(
 
-                    command +
+                    type +
                     " : " +
                     value
 
@@ -239,11 +277,16 @@ public class SmartBuilderActivity extends Activity {
 
 
 
+
+
             adapter.notifyDataSetChanged();
 
 
 
+
+
             valueInput.setText("");
+
 
 
 
@@ -269,12 +312,17 @@ public class SmartBuilderActivity extends Activity {
 
 
 
+
+
             if(name.isEmpty()){
 
+
                 name =
-                "Smart Workflow";
+                        "Smart Workflow";
+
 
             }
+
 
 
 
@@ -294,11 +342,12 @@ public class SmartBuilderActivity extends Activity {
 
 
 
+
             Toast.makeText(
 
                     this,
 
-                    "Workflow Saved",
+                    "Smart Workflow Saved",
 
                     Toast.LENGTH_SHORT
 
@@ -306,7 +355,10 @@ public class SmartBuilderActivity extends Activity {
 
 
 
+
         });
+
+
 
 
 
@@ -325,6 +377,8 @@ public class SmartBuilderActivity extends Activity {
         layout.addView(stepList);
 
         layout.addView(save);
+
+
 
 
 
