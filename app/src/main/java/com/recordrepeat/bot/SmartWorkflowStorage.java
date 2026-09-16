@@ -4,8 +4,10 @@ package com.recordrepeat.bot;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+
 import org.json.JSONArray;
 import org.json.JSONObject;
+
 
 import java.util.ArrayList;
 
@@ -14,12 +16,16 @@ import java.util.ArrayList;
 public class SmartWorkflowStorage {
 
 
-    private static final String PREF_NAME =
-            "SMART_WORKFLOW_PREF";
+
+    private static final String PREF =
+            "smart_workflows";
 
 
-    private static final String KEY_WORKFLOW =
-            "SMART_WORKFLOWS";
+
+    private static final String KEY =
+            "workflows";
+
+
 
 
 
@@ -27,35 +33,30 @@ public class SmartWorkflowStorage {
 
 
     public static void saveWorkflow(
+
             Context context,
+
             String name,
+
             ArrayList<SmartCommand> commands
+
     ){
+
 
 
         try{
 
 
-            SharedPreferences pref =
-                    context.getSharedPreferences(
-                            PREF_NAME,
-                            Context.MODE_PRIVATE
-                    );
-
-
-
             JSONArray workflows =
-                    new JSONArray(
-                            pref.getString(
-                                    KEY_WORKFLOW,
-                                    "[]"
-                            )
-                    );
+                    getWorkflows(context);
+
+
 
 
 
             JSONArray steps =
                     new JSONArray();
+
 
 
 
@@ -69,6 +70,8 @@ public class SmartWorkflowStorage {
 
 
             }
+
+
 
 
 
@@ -93,6 +96,8 @@ public class SmartWorkflowStorage {
 
 
 
+
+
             workflows.put(
                     workflow
             );
@@ -100,12 +105,20 @@ public class SmartWorkflowStorage {
 
 
 
-            pref.edit()
+
+
+            context
+                    .getSharedPreferences(
+                            PREF,
+                            Context.MODE_PRIVATE
+                    )
+                    .edit()
                     .putString(
-                            KEY_WORKFLOW,
+                            KEY,
                             workflows.toString()
                     )
                     .apply();
+
 
 
 
@@ -130,28 +143,32 @@ public class SmartWorkflowStorage {
 
 
     public static JSONArray getWorkflows(
+
             Context context
+
     ){
+
 
 
         try{
 
 
-            SharedPreferences pref =
-                    context.getSharedPreferences(
-                            PREF_NAME,
+            String data =
+
+                    context
+                    .getSharedPreferences(
+                            PREF,
                             Context.MODE_PRIVATE
+                    )
+                    .getString(
+                            KEY,
+                            "[]"
                     );
 
 
 
             return new JSONArray(
-
-                    pref.getString(
-                            KEY_WORKFLOW,
-                            "[]"
-                    )
-
+                    data
             );
 
 
@@ -159,10 +176,14 @@ public class SmartWorkflowStorage {
         }catch(Exception e){
 
 
+            e.printStackTrace();
+
+
             return new JSONArray();
 
 
         }
+
 
 
     }
@@ -176,12 +197,16 @@ public class SmartWorkflowStorage {
 
 
     public static ArrayList<SmartCommand> loadWorkflow(
+
             Context context,
+
             String name
+
     ){
 
 
-        ArrayList<SmartCommand> commands =
+
+        ArrayList<SmartCommand> list =
                 new ArrayList<>();
 
 
@@ -189,18 +214,24 @@ public class SmartWorkflowStorage {
         try{
 
 
+
             JSONArray workflows =
-                    getWorkflows(
-                            context
-                    );
+                    getWorkflows(context);
+
+
 
 
 
             for(int i=0;i<workflows.length();i++){
 
 
+
                 JSONObject workflow =
+
                         workflows.getJSONObject(i);
+
+
+
 
 
 
@@ -210,41 +241,59 @@ public class SmartWorkflowStorage {
 
 
 
+
+
                     JSONArray steps =
-                            workflow.getJSONArray(
+
+                            workflow
+                            .getJSONArray(
                                     "steps"
                             );
+
+
+
+
 
 
 
                     for(int j=0;j<steps.length();j++){
 
 
+
                         SmartCommand command =
+
                                 SmartCommand.fromJSON(
+
                                         steps.getJSONObject(j)
+
                                 );
 
 
 
                         if(command != null){
 
-
-                            commands.add(
+                            list.add(
                                     command
                             );
 
-
                         }
+
 
 
                     }
 
 
+
+                    break;
+
+
                 }
 
 
+
             }
+
+
 
 
 
@@ -258,7 +307,8 @@ public class SmartWorkflowStorage {
 
 
 
-        return commands;
+
+        return list;
 
 
     }
@@ -268,51 +318,50 @@ public class SmartWorkflowStorage {
 
 
 
+
     public static void deleteWorkflow(
+
             Context context,
+
             String name
+
     ){
 
 
         try{
 
 
-            SharedPreferences pref =
-                    context.getSharedPreferences(
-                            PREF_NAME,
-                            Context.MODE_PRIVATE
-                    );
+            JSONArray workflows =
+                    getWorkflows(context);
 
 
 
-            JSONArray oldList =
-                    getWorkflows(
-                            context
-                    );
 
-
-
-            JSONArray newList =
+            JSONArray newArray =
                     new JSONArray();
 
 
 
 
-            for(int i=0;i<oldList.length();i++){
 
-
-                JSONObject item =
-                        oldList.getJSONObject(i);
+            for(int i=0;i<workflows.length();i++){
 
 
 
-                if(!item
+                JSONObject workflow =
+                        workflows.getJSONObject(i);
+
+
+
+
+
+                if(!workflow
                         .getString("name")
                         .equals(name)){
 
 
-                    newList.put(
-                            item
+                    newArray.put(
+                            workflow
                     );
 
 
@@ -324,12 +373,21 @@ public class SmartWorkflowStorage {
 
 
 
-            pref.edit()
+
+
+            context
+                    .getSharedPreferences(
+                            PREF,
+                            Context.MODE_PRIVATE
+                    )
+                    .edit()
                     .putString(
-                            KEY_WORKFLOW,
-                            newList.toString()
+                            KEY,
+                            newArray.toString()
                     )
                     .apply();
+
+
 
 
 
@@ -340,6 +398,7 @@ public class SmartWorkflowStorage {
 
 
         }
+
 
 
     }
