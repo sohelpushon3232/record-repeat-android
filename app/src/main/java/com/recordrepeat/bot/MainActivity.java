@@ -317,10 +317,33 @@ public class MainActivity extends Activity {
 
 
 
-            WorkflowStorage.saveWorkflow(
-                    this,
-                    name,
-                    recordManager.getSteps()
+          List<ActionStep> savedSteps =
+        recordManager.getSteps();
+
+
+
+if(savedSteps.isEmpty()){
+
+
+    Toast.makeText(
+            this,
+            "No recording found",
+            Toast.LENGTH_SHORT
+    ).show();
+
+
+    return;
+
+
+}
+
+
+
+WorkflowStorage.saveWorkflow(
+        this,
+        name,
+        savedSteps
+);
             );
 
 
