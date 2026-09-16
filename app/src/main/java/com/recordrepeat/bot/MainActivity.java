@@ -117,6 +117,12 @@ public class MainActivity extends Activity {
         stop.setText(
                 "STOP REPEAT"
         );
+        Button delete =
+        new Button(this);
+
+delete.setText(
+        "DELETE WORKFLOW"
+);
 
 
 
