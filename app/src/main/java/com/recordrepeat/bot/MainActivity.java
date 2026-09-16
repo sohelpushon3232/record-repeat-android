@@ -38,6 +38,9 @@ public class MainActivity extends Activity {
 
     Button floatingButton;
 
+    Button smartBuilderButton;
+
+
 
 
     @Override
@@ -58,14 +61,17 @@ public class MainActivity extends Activity {
                 new LinearLayout(this);
 
 
+
         layout.setOrientation(
                 LinearLayout.VERTICAL
         );
 
 
+
         layout.setPadding(
                 30,30,30,30
         );
+
 
 
 
@@ -76,6 +82,7 @@ public class MainActivity extends Activity {
         workflowName.setHint(
                 "Workflow Name"
         );
+
 
 
 
@@ -158,434 +165,21 @@ public class MainActivity extends Activity {
 
 
 
+
+        smartBuilderButton =
+                new Button(this);
+
+
+        smartBuilderButton.setText(
+                "SMART BUILDER"
+        );
+
+
+
+
         workflowList =
                 new ListView(this);
 
 
 
         loadWorkflows();
-
-
-
-        record.setOnClickListener(v -> {
-
-
-            recordManager.startRecording();
-
-
-
-            Toast.makeText(
-                    this,
-                    "Recording Started",
-                    Toast.LENGTH_SHORT
-            ).show();
-
-
-
-        });
-
-
-
-
-        save.setOnClickListener(v -> {
-
-
-
-            String name =
-                    workflowName
-                    .getText()
-                    .toString();
-
-
-
-            if(name.isEmpty()){
-
-                name = "My Workflow";
-
-            }
-
-
-
-
-            WorkflowStorage.saveWorkflow(
-                    this,
-                    name,
-                    recordManager.getSteps()
-            );
-
-
-
-            loadWorkflows();
-
-
-
-            Toast.makeText(
-                    this,
-                    "Workflow Saved",
-                    Toast.LENGTH_SHORT
-            ).show();
-
-
-
-        });
-
-
-
-
-        workflowList.setOnItemClickListener(
-                (parent, view, position, id) -> {
-
-
-                    selectedWorkflow =
-                            names.get(position);
-
-
-
-                    Toast.makeText(
-                            this,
-                            selectedWorkflow+" selected",
-                            Toast.LENGTH_SHORT
-                    ).show();
-
-
-
-                });
-
-        run.setOnClickListener(v -> {
-
-
-            if(selectedWorkflow.isEmpty()){
-
-
-                Toast.makeText(
-                        this,
-                        "Select workflow first",
-                        Toast.LENGTH_SHORT
-                ).show();
-
-
-                return;
-
-            }
-
-
-
-            TouchRecorderService service =
-                    TouchRecorderService.getInstance();
-
-
-
-            if(service == null){
-
-
-                Toast.makeText(
-                        this,
-                        "Enable Accessibility First",
-                        Toast.LENGTH_LONG
-                ).show();
-
-
-                return;
-
-            }
-
-
-
-            int count = 1;
-
-
-
-            try{
-
-
-                count =
-                Integer.parseInt(
-                        repeatInput
-                        .getText()
-                        .toString()
-                );
-
-
-            }catch(Exception ignored){}
-
-
-
-
-            List<ActionStep> steps =
-                    WorkflowStorage.loadWorkflow(
-                            this,
-                            selectedWorkflow
-                    );
-
-
-
-            if(steps.isEmpty()){
-
-
-                Toast.makeText(
-                        this,
-                        "No steps found",
-                        Toast.LENGTH_SHORT
-                ).show();
-
-
-                return;
-
-            }
-
-
-
-
-            autoRepeatEngine =
-                    new AutoRepeatEngine(
-                            service
-                    );
-
-
-
-            autoRepeatEngine.start(
-                    steps,
-                    count
-            );
-
-
-
-            Toast.makeText(
-                    this,
-                    "Auto Repeat Started",
-                    Toast.LENGTH_SHORT
-            ).show();
-
-
-
-        });
-
-
-
-
-
-
-        stop.setOnClickListener(v -> {
-
-
-
-            if(autoRepeatEngine != null){
-
-
-                autoRepeatEngine.stop();
-
-
-            }
-
-
-
-            Toast.makeText(
-                    this,
-                    "Automation Stopped",
-                    Toast.LENGTH_SHORT
-            ).show();
-
-
-
-        });
-
-
-
-
-
-
-
-        delete.setOnClickListener(v -> {
-
-
-
-            if(selectedWorkflow.isEmpty()){
-
-
-                Toast.makeText(
-                        this,
-                        "Select workflow first",
-                        Toast.LENGTH_SHORT
-                ).show();
-
-
-                return;
-
-            }
-
-
-
-
-            WorkflowStorage.deleteWorkflow(
-                    this,
-                    selectedWorkflow
-            );
-
-
-
-            selectedWorkflow = "";
-
-
-
-            loadWorkflows();
-
-
-
-            Toast.makeText(
-                    this,
-                    "Workflow Deleted",
-                    Toast.LENGTH_SHORT
-            ).show();
-
-
-
-        });
-
-
-
-
-
-
-
-        floatingButton.setOnClickListener(v -> {
-
-
-
-            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
-                    && !Settings.canDrawOverlays(this)){
-
-
-
-                Intent intent =
-                        new Intent(
-                                Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                                Uri.parse(
-                                        "package:"+
-                                        getPackageName()
-                                )
-                        );
-
-
-
-                startActivity(intent);
-
-
-
-            }else{
-
-
-                Intent intent =
-                        new Intent(
-                                this,
-                                FloatingControlService.class
-                        );
-
-
-
-                startService(intent);
-
-
-
-                Toast.makeText(
-                        this,
-                        "Floating BOT Started",
-                        Toast.LENGTH_SHORT
-                ).show();
-
-
-            }
-
-
-        });
-
-
-
-
-
-
-
-        layout.addView(workflowName);
-
-        layout.addView(repeatInput);
-
-        layout.addView(record);
-
-        layout.addView(save);
-
-        layout.addView(workflowList);
-
-        layout.addView(run);
-
-        layout.addView(stop);
-
-        layout.addView(delete);
-
-        layout.addView(floatingButton);
-
-
-
-        setContentView(layout);
-
-
-
-    }
-
-
-
-
-
-
-
-    private void loadWorkflows(){
-
-
-
-        names.clear();
-
-
-
-        JSONArray array =
-                WorkflowStorage.getWorkflows(this);
-
-
-
-
-        for(int i=0;i<array.length();i++){
-
-
-            try{
-
-
-                names.add(
-                        array.getJSONObject(i)
-                        .getString("name")
-                );
-
-
-
-            }catch(Exception ignored){}
-
-
-
-        }
-
-
-
-
-
-
-        workflowList.setAdapter(
-                new ArrayAdapter<>(
-                        this,
-                        android.R.layout.simple_list_item_1,
-                        names
-                )
-        );
-
-
-
-    }
-
-
-
-}
