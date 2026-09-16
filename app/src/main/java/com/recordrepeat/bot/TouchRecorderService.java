@@ -42,11 +42,16 @@ public class TouchRecorderService extends AccessibilityService {
 
     private String lastPackage = "";
 
+
+
     private long lastClickTime = 0;
+
 
     private int lastX = -1;
 
+
     private int lastY = -1;
+
 
 
 
@@ -114,8 +119,12 @@ public class TouchRecorderService extends AccessibilityService {
 
 
 
-        if(event == null)
+        if(event == null){
+
             return;
+
+        }
+
 
 
 
@@ -128,9 +137,11 @@ public class TouchRecorderService extends AccessibilityService {
 
 
 
-        if(!manager.isRecording())
+        if(!manager.isRecording()){
+
             return;
 
+        }
 
 
 
@@ -138,6 +149,8 @@ public class TouchRecorderService extends AccessibilityService {
 
 
         String packageName = "";
+
+
 
 
 
@@ -157,6 +170,9 @@ public class TouchRecorderService extends AccessibilityService {
 
 
 
+
+        // Ignore own app
+
         if(packageName.equals(
                 getPackageName()
         )){
@@ -173,15 +189,15 @@ public class TouchRecorderService extends AccessibilityService {
 
 
 
-        // APP CHANGE RECORD
+
+
+        // APP OPEN RECORD
 
 
         if(event.getEventType()
                 ==
                 AccessibilityEvent
                 .TYPE_WINDOW_STATE_CHANGED){
-
-
 
 
 
@@ -217,12 +233,10 @@ public class TouchRecorderService extends AccessibilityService {
                 );
 
 
-
             }
 
 
         }
-
 
 
 
@@ -237,8 +251,14 @@ public class TouchRecorderService extends AccessibilityService {
 
 
 
-        if(node == null)
+
+        if(node == null){
+
             return;
+
+        }
+
+
 
 
 
@@ -249,19 +269,63 @@ public class TouchRecorderService extends AccessibilityService {
         // CLICK RECORD
 
 
-
-
         if(event.getEventType()
                 ==
-                AccessibilityEvent
-                .TYPE_VIEW_CLICKED
+                AccessibilityEvent.TYPE_VIEW_CLICKED
                 ||
-
                 event.getEventType()
                 ==
-                AccessibilityEvent
-                .TYPE_VIEW_LONG_CLICKED){
+                AccessibilityEvent.TYPE_VIEW_LONG_CLICKED){
 
+
+
+            AccessibilityNodeInfo clickNode =
+                    node;
+
+
+
+
+
+            while(clickNode != null
+                    &&
+                    !clickNode.isClickable()){
+
+
+                AccessibilityNodeInfo parent =
+                        clickNode.getParent();
+
+
+
+                if(parent == null){
+
+                    break;
+
+                }
+
+
+
+                clickNode = parent;
+
+
+
+            }
+
+
+
+
+
+
+
+            if(clickNode == null){
+
+
+                node.recycle();
+
+
+                return;
+
+
+            }
 
 
 
@@ -274,9 +338,10 @@ public class TouchRecorderService extends AccessibilityService {
 
 
 
-            node.getBoundsInScreen(
+            clickNode.getBoundsInScreen(
                     rect
             );
+
 
 
 
@@ -294,28 +359,11 @@ public class TouchRecorderService extends AccessibilityService {
 
 
 
-
-
-            long now =
-                    System.currentTimeMillis();
-
-
-
-
-
-
-            // duplicate click block
-
-
-            if(x == lastX
-                    &&
-                    y == lastY
-                    &&
-                    now-lastClickTime < 500){
-
+            if(x <= 0 || y <= 0){
 
 
                 node.recycle();
+
 
                 return;
 
@@ -327,9 +375,38 @@ public class TouchRecorderService extends AccessibilityService {
 
 
 
+            long now =
+                    System.currentTimeMillis();
+
+
+
+
+
+            if(x == lastX
+                    &&
+                    y == lastY
+                    &&
+                    now - lastClickTime < 500){
+
+
+
+                node.recycle();
+
+
+                return;
+
+
+            }
+
+
+
+
+
             lastX = x;
 
+
             lastY = y;
+
 
             lastClickTime = now;
 
@@ -360,76 +437,70 @@ public class TouchRecorderService extends AccessibilityService {
 
 
         }
-
-
-
-
-
-
-
-
-
-        // TEXT RECORD
-
+                // TEXT RECORD
 
 
         if(event.getEventType()
                 ==
-                AccessibilityEvent
-                .TYPE_VIEW_TEXT_CHANGED
+                AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED
                 ||
-
                 event.getEventType()
                 ==
-                AccessibilityEvent
-                .TYPE_VIEW_FOCUSED){
+                AccessibilityEvent.TYPE_VIEW_FOCUSED){
+
+
+
+
+
+            if(!node.isPassword()){
+
+
+
+                CharSequence text =
+                        node.getText();
+
+
+
+
+
+                if(text != null){
+
+
+
+                    String value =
+                            text.toString();
 
 
 
 
 
 
-            CharSequence text =
-                    node.getText();
+                    if(!value.isEmpty()){
 
 
 
+                        manager.replaceLastText(
+
+                                new ActionStep(
+
+                                        "TEXT",
+
+                                        0,
+
+                                        0,
+
+                                        value,
+
+                                        300
+
+                                )
+
+                        );
 
 
-            if(text != null){
 
+                    }
 
-
-                String value =
-                        text.toString();
-
-
-
-
-
-                if(!value.isEmpty()
-                        &&
-                        !node.isPassword()){
-
-
-
-                    manager.replaceLastText(
-
-                            new ActionStep(
-
-                                    "TEXT",
-
-                                    0,
-
-                                    0,
-
-                                    value,
-
-                                    300
-
-                            )
-
-                    );
 
 
                 }
@@ -439,7 +510,9 @@ public class TouchRecorderService extends AccessibilityService {
             }
 
 
+
         }
+
 
 
 
@@ -451,7 +524,11 @@ public class TouchRecorderService extends AccessibilityService {
 
 
     }
-    
+
+
+
+
+
 
 
 
@@ -472,6 +549,7 @@ public class TouchRecorderService extends AccessibilityService {
 
 
 
+
             path.moveTo(
                     x,
                     y
@@ -485,10 +563,16 @@ public class TouchRecorderService extends AccessibilityService {
 
                     new GestureDescription
                     .StrokeDescription(
+
                             path,
+
                             0,
+
                             100
+
                     );
+
+
 
 
 
@@ -507,11 +591,18 @@ public class TouchRecorderService extends AccessibilityService {
 
 
 
+
             dispatchGesture(
+
                     gesture,
+
                     null,
+
                     null
+
             );
+
+
 
 
 
@@ -540,24 +631,24 @@ public class TouchRecorderService extends AccessibilityService {
 
 
             AccessibilityNodeInfo root =
-
                     getRootInActiveWindow();
 
 
 
 
 
+            if(root == null){
 
-            if(root == null)
                 return;
 
+            }
 
 
 
 
 
 
-            AccessibilityNodeInfo node =
+            AccessibilityNodeInfo input =
 
                     root.findFocus(
 
@@ -571,8 +662,13 @@ public class TouchRecorderService extends AccessibilityService {
 
 
 
-            if(node == null)
+            if(input == null){
+
+                root.recycle();
+
                 return;
+
+            }
 
 
 
@@ -582,6 +678,7 @@ public class TouchRecorderService extends AccessibilityService {
 
             Bundle args =
                     new Bundle();
+
 
 
 
@@ -602,7 +699,7 @@ public class TouchRecorderService extends AccessibilityService {
 
 
 
-            node.performAction(
+            input.performAction(
 
                     AccessibilityNodeInfo
                     .ACTION_SET_TEXT,
@@ -611,6 +708,14 @@ public class TouchRecorderService extends AccessibilityService {
 
             );
 
+
+
+
+
+
+            input.recycle();
+
+            root.recycle();
 
 
 
@@ -690,6 +795,7 @@ public class TouchRecorderService extends AccessibilityService {
     public void onInterrupt(){
 
 
+
     }
 
 
@@ -715,7 +821,6 @@ public class TouchRecorderService extends AccessibilityService {
 
 
 
-
         super.onDestroy();
 
 
@@ -725,6 +830,4 @@ public class TouchRecorderService extends AccessibilityService {
 
 
 
-
 }
-    
