@@ -59,28 +59,22 @@ public class TouchRecorderService extends AccessibilityService {
 
 
 
-    @Override
-    protected void onServiceConnected(){
+   @Override
+protected void onServiceConnected() {
 
-        super.onServiceConnected();
-
-
-
-        instance = this;
-
-        connected = true;
+    super.onServiceConnected();
 
 
-
-        Toast.makeText(
-                this,
-                "Recorder Service Ready",
-                Toast.LENGTH_SHORT
-        ).show();
+    instance = this;
 
 
-    }
+    Toast.makeText(
+            this,
+            "Accessibility Connected",
+            Toast.LENGTH_SHORT
+    ).show();
 
+}
 
 
 
@@ -481,18 +475,19 @@ public class TouchRecorderService extends AccessibilityService {
 
 
     @Override
-    public void onDestroy(){
+public void onDestroy() {
 
 
-        connected = false;
+    if(instance == this){
+
+        instance = null;
+
+    }
 
 
-        // instance clear না করে রাখা হচ্ছে
-        // যাতে reconnect issue কম হয়
+    super.onDestroy();
 
-
-        super.onDestroy();
-
+}
 
     }
 
